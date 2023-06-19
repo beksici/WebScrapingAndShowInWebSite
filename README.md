@@ -1,5 +1,7 @@
  # E-Commerce Site with Web Scraping (Web Scraping ile E-Ticaret Sitesi)
  
+ ## Proje Raporu ve daha fazla bilgi için Proje Raporu.pdf
+ 
  
 ***Web*** ***scraping*** ***ile*** ***belirlenmiş*** ***en*** ***az***
 ***4*** ***siteden*** ***dizüstü*** ***bilgisayar***
