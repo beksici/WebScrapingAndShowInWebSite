@@ -1,0 +1,2983 @@
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import javax.lang.model.element.Element;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
+
+
+
+public class Vatan {
+public static int hangiId;
+	public static void main(String[] args) {
+
+		int boslukIndeksi, ilkBoslukIndeks, indeks;
+		String ssdBoyut = "-";
+		String cleaner;
+		int b;
+		String hddBoyut = "-";
+		ArrayList<String> urunLinkleri = new ArrayList<String>();
+		ArrayList<String> urunTitles = new ArrayList<String>();
+		ArrayList<String> fiyatlar = new ArrayList<String>();
+		ArrayList<String> yildizlar = new ArrayList<String>();
+		ArrayList<String> site = new ArrayList<String>();
+		ArrayList<String> urunImage = new ArrayList<String>();
+		ArrayList<String> ekranBoyutu = new ArrayList<String>();
+		ArrayList<String> dos = new ArrayList<String>();
+		ArrayList<String> ram = new ArrayList<String>();
+		ArrayList<String> markalar = new ArrayList<String>();
+		ArrayList<String> markasizTitles = new ArrayList<String>();
+		ArrayList<String> Ssd = new ArrayList<String>();
+		ArrayList<String> Hdd = new ArrayList<String>();
+		ArrayList<String> islemciTipi = new ArrayList<String>();
+		ArrayList<String> islemciNesil = new ArrayList<String>();
+		ArrayList<String> model = new ArrayList<String>();
+		String mainUrl= "https://www.vatanbilgisayar.com";
+		for (int i = 0; i <20 ; i++) {
+
+			String url1;
+			if (i == 0) {
+				url1 = "https://www.vatanbilgisayar.com/notebook/";
+				i++;
+			} else
+				url1 = "https://www.vatanbilgisayar.com/notebook/?page=" + i;
+			System.out.println(url1);
+			System.out.println();
+
+			try {
+				final Document document = Jsoup.connect(url1).get();
+				Elements images = document.getElementsByClass("product-list product-list--list-page");
+
+				for (org.jsoup.nodes.Element image : images) {
+					// System.out.println(image.text());
+					System.out.println(image.getElementsByTag("h3").text());// TITTLE
+					urunTitles.add(image.getElementsByTag("h3").text());
+					// System.out.println(image.getElementsByClass("product-list__price").text());//FİYAT
+					// BİLGİSİ
+					fiyatlar.add(image.getElementsByClass("product-list__price").text());
+					// System.out.println( image.select("a").attr("href").toString());//URUN
+					// LİNKLERİ
+					urunLinkleri.add(mainUrl+image.select("a").attr("href").toString());
+					// System.out.println(image.getElementsByClass("score").attr("style").replaceAll("\\D+",""));
+					urunImage.add(image.getElementsByClass("lazyimg").attr("data-src"));
+
+					String clean = image.getElementsByClass("score").attr("style").replaceAll("\\D+", "");
+					int yildizz = Integer.parseInt(clean);
+					yildizz /= 20;// Yildizi
+					String yildiz = "" + yildizz;
+					yildizlar.add(yildiz);
+
+					site.add("Vatan");
+
+					// System.out.println(image.attributes());
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		for (int i = 0; i < urunTitles.size(); i++) {
+
+			if (urunTitles.get(i).contains("inc")) {
+				String ekran = urunTitles.get(i)
+						.subSequence((urunTitles.get(i).indexOf("inc") - 4), (urunTitles.get(i).indexOf("inc")))
+						.toString();
+				if (ekran.contains("-")) {
+					boslukIndeksi = ekran.indexOf("-");
+					ekranBoyutu.add(ekran.substring(boslukIndeksi + 1));
+				} else {
+					ekranBoyutu.add(ekran);
+				}
+				// System.out.println(ekranBoyutu.get(i));
+			} else {
+				ekranBoyutu.add("-");
+
+			}
+
+			if (urunTitles.get(i).contains("Freedos") || urunTitles.get(i).contains("Dos"))
+				dos.add("FreeDOS");
+			else if (urunTitles.get(i).contains("Windows") || urunTitles.get(i).contains("W11H")
+					|| urunTitles.get(i).contains("W10") || urunTitles.get(i).contains("W11")
+					|| urunTitles.get(i).contains("Win10") || urunTitles.get(i).contains("W10H")
+					|| urunTitles.get(i).contains("Win11") || urunTitles.get(i).contains("WIN11"))
+				dos.add("Windows");
+			else if (urunTitles.get(i).contains("M1") || urunTitles.get(i).contains("M2"))
+				dos.add("MacOS");
+			else if (urunTitles.get(i).contains("Linux"))
+				dos.add("Linux");
+			else if (urunTitles.get(i).contains("Ubuntu"))
+				dos.add("Ubuntu");
+			else
+				dos.add("-");
+
+			int sonIndeks = urunTitles.get(i).indexOf("Gb");
+			int baslangicIndeks = urunTitles.get(i).indexOf("Gb") - 2;
+			String rams, clean;
+			if (urunTitles.get(i).contains("Gb") && urunTitles.get(i).contains("-")) {
+				rams = urunTitles.get(i).substring(baslangicIndeks, sonIndeks);
+				clean = rams.replaceAll("\\D+", "");
+				int a = Integer.parseInt(clean);
+				ram.add(Integer.toString(a));
+			} else {
+				ram.add("-");
+
+			}
+//MARKAYI ALDIK
+			ilkBoslukIndeks = urunTitles.get(i).indexOf(" ");
+			markalar.add(urunTitles.get(i).substring(0, ilkBoslukIndeks));
+
+			markasizTitles.add(urunTitles.get(i).substring(ilkBoslukIndeks + 1, (urunTitles.get(i).length() - 1)));
+
+			if (urunTitles.get(i).contains("Hdd") && urunTitles.get(i).contains("Ssd")) {
+
+				ssdBoyut = urunTitles.get(i)
+						.subSequence((urunTitles.get(i).indexOf("Ssd") - 6), (urunTitles.get(i).indexOf("Ssd")))
+						.toString();
+				cleaner = ssdBoyut.replaceAll("\\D+", "");
+				b = Integer.parseInt(cleaner);
+				Ssd.add(Integer.toString(b));
+				hddBoyut = urunTitles.get(i)
+						.subSequence((urunTitles.get(i).indexOf("Hdd") - 6), (urunTitles.get(i).indexOf("Hdd")))
+						.toString();
+				cleaner = hddBoyut.replaceAll("\\D+", "");
+				b = Integer.parseInt(cleaner);
+				Hdd.add(Integer.toString(b));
+
+			} else if (urunTitles.get(i).contains("Ssd")) {
+				ssdBoyut = urunTitles.get(i)
+						.subSequence((urunTitles.get(i).indexOf("Ssd") - 6), (urunTitles.get(i).indexOf("Ssd")))
+						.toString();
+				cleaner = ssdBoyut.replaceAll("\\D+", "");
+				b = Integer.parseInt(cleaner);
+				Ssd.add(Integer.toString(b));
+				Hdd.add("-");
+
+			} else if (urunTitles.get(i).contains("Hdd")) {
+				hddBoyut = urunTitles.get(i).substring((urunTitles.get(i).indexOf("Hdd") - 6),
+						(urunTitles.get(i).indexOf("Hdd")));
+				cleaner = hddBoyut.replaceAll("\\D+", "");
+				b = Integer.parseInt(cleaner);
+				Hdd.add(Integer.toString(b));
+				Ssd.add("-");
+
+			} else {
+				Ssd.add("-");
+				Hdd.add("-");
+			}
+
+			if (urunTitles.get(i).contains("Core")) {
+				indeks = urunTitles.get(i).indexOf("Core") + 5;
+				islemciTipi.add(urunTitles.get(i).substring(indeks, indeks + 2));
+				islemciNesil.add(urunTitles.get(i).substring(indeks + 3, indeks + 5));
+			} else if (urunTitles.get(i).contains("Ryzen")) {
+				indeks = urunTitles.get(i).indexOf("Ryzen");
+				islemciTipi.add(urunTitles.get(i).substring(indeks, indeks + 7));
+				indeks = indeks + 8;
+				islemciNesil.add(urunTitles.get(i).substring(indeks, indeks + 1));
+			} else if (urunTitles.get(i).contains("M1")) {
+				islemciTipi.add("M1");
+				islemciNesil.add("-");
+			} else if (urunTitles.get(i).contains("M2")) {
+				islemciTipi.add("M2");
+				islemciNesil.add("-");
+
+			} else {
+				islemciTipi.add("-");
+				islemciNesil.add("-");
+			}
+
+			if (markasizTitles.get(i).contains("M1")) {
+				indeks = markasizTitles.get(i).indexOf("M1") - 1;
+				model.add(markasizTitles.get(i).substring(0, indeks));
+			} else if (markasizTitles.get(i).contains("M2")) {
+				indeks = markasizTitles.get(i).indexOf("M2") - 1;
+				model.add(markasizTitles.get(i).substring(0, indeks));
+			}
+
+			else if (markasizTitles.get(i).contains(".")) {
+				indeks = markasizTitles.get(i).indexOf(".") - 2;
+				if (indeks > (markasizTitles.get(i).length() / 2))
+					model.add("-");
+				else
+					model.add(markasizTitles.get(i).substring(0, indeks));
+
+			} else {
+				model.add("-");
+			}
+			
+			markalar.set(i,  markalar.get(i).toUpperCase());
+			
+			if(ekranBoyutu.get(i).trim().equals("5.6"))
+				ekranBoyutu.set(i, "15.6");
+			if(islemciTipi.get(i).trim().equals("5"))
+				islemciTipi.set(i, "i5");
+			if(islemciTipi.get(i).trim().equals("9"))
+				islemciTipi.set(i, "i9");
+			if(islemciNesil.get(i).trim().equals("29"))
+				islemciNesil.set(i, "12");
+			if(islemciNesil.get(i).trim().equals("25"))
+				islemciNesil.set(i, "12");
+			if(islemciNesil.get(i).trim().equals("L1"))
+				islemciNesil.set(i, "11");
+			if(islemciNesil.get(i).trim().equals("93"))
+				islemciNesil.set(i, "9");
+			if(islemciNesil.get(i).trim().equals("85"))
+				islemciNesil.set(i, "8");
+			if(markalar.get(i).trim().equals("OMEN")||markalar.get(i).trim().equals("VİCTUS"))
+				markalar.set(i, "HP");
+			if(markalar.get(i).trim().equals("MACBOOK"))
+				markalar.set(i, "APPLE");
+			
+			
+			islemciTipi.set(i, islemciTipi.get(i).replaceAll(" ", ""));
+			ekranBoyutu.set(i, ekranBoyutu.get(i).replace(".",","));
+			
+			
+			  System.out.println("***********"); System.out.print("marka = " +
+			  markalar.get(i)+ " "); System.out.print(" model= " + model.get(i)+ " ");
+			  System.out.print("ekran = "+ ekranBoyutu.get(i) + " " );
+			  System.out.print("ram = "+ ram.get(i)+" " );
+			  System.out.print("ssd= "+Ssd.get(i)+" " ); System.out.print( "hdd ="
+			  +Hdd.get(i)+ " "); System.out.print("puan =" + yildizlar.get(i) + " ");
+			  System.out.print(" fiyat = " + fiyatlar.get(i) +" ");
+			  
+			  
+			  System.out.print("tip= "+ islemciTipi.get(i)+"  " +" nesil= "+
+			  islemciNesil.get(i)); System.out.println(urunImage.get(i));
+			  System.out.println();
+			 
+
+		}
+
+		int j; 
+	for (j= 0; j < urunTitles.size(); j++) {
+		Baglanti.DatabaseYazdirNotDuplicateFirst("model","name",model.get(j).trim());
+		int count = Baglanti.Count();
+		Baglanti.DatabaseYazdir(count,"marka",markalar.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"ssd",Ssd.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"hdd", Hdd.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"islemci_tipi",islemciTipi.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"islemci_nesli",islemciNesil.get(j).trim()); 
+		Baglanti.DatabaseYazdir(count,"isletim_sistemi",dos.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"ram",ram.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"ekran",ekranBoyutu.get(j).trim());
+		
+		Baglanti.DatabaseYazdir(count,"puan",yildizlar.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"site",site.get(j).trim());
+		Baglanti.DatabaseModelSite(site.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","fiyat",fiyatlar.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","image_url",urunImage.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","urun_url",urunLinkleri.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","urun_title",urunTitles.get(j).trim());
+		
+	}
+	
+	
+		
+		
+//DatabaseIsletimTipiNesil();
+		
+	}
+
+	
+	
+	//ÖLÜ METHOD
+	public static void DatabaseIsletimTipiNesil()
+	{ int x;
+	String y="";
+		ResultSet myRes = Baglanti.yap("model");
+	String sorgu="select islemci_tipi_id from model ";
+	myRes = Baglanti.sorgula(sorgu);
+	try {
+		while(myRes.next()) {
+			x=myRes.getInt("islemci_tipi_id");
+			myRes=Baglanti.yap("islemci_tipi_nesli");
+			sorgu="insert into islemci_tipi_nesli (islemci_tipi_id) values ('"+x+"');";
+			Baglanti.ekle(sorgu);
+			
+		}
+		myRes = Baglanti.yap("model");
+		sorgu="select islemci_nesli_id from model ";
+		myRes = Baglanti.sorgula(sorgu);
+		while(myRes.next()) {
+			x=myRes.getInt("islemci_nesli_id");
+			myRes=Baglanti.yap("islemci_tipi_nesli");
+			sorgu="insert into islemci_tipi_nesli (islemci_tipi_id) values ('"+x+"');";
+			Baglanti.ekle(sorgu);
+		}
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
+
+		
+		
+		
+	}	
+	
+	
+}
+
+
+
+
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.lang.model.element.Element;
+import javax.swing.plaf.synth.SynthOptionPaneUI;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
+
+public class N11 {
+
+	public static void main(String[] args) {
+		ArrayList<String> urunOzellikler = new ArrayList<String>();
+		ArrayList<String> urunTitles = new ArrayList<String>();
+		ArrayList<String> urunLinkleri = new ArrayList<String>();
+		ArrayList<String> markalar = new ArrayList<String>();
+		ArrayList<String> fiyatlar = new ArrayList<String>();
+		ArrayList<String> site = new ArrayList<String>();
+		ArrayList<String> sadeceOzellikler = new ArrayList<String>();
+		ArrayList<String> ekranBoyutu = new ArrayList<String>();
+		ArrayList<String> islemciTipi = new ArrayList<String>();
+		ArrayList<String> islemciNesil = new ArrayList<String>();
+		ArrayList<String> model = new ArrayList<String>();
+		ArrayList<String> dos = new ArrayList<String>();
+		ArrayList<String> ram = new ArrayList<String>();
+		ArrayList<String> Ssd = new ArrayList<String>();
+		ArrayList<String> Hdd = new ArrayList<String>();
+		ArrayList<String> urunImage = new ArrayList<String>();
+		ArrayList<String> yildizlar = new ArrayList<String>();
+		ArrayList<String> SubIslemci = new ArrayList<String>();
+		int indeks;
+		String url1 = "https://www.n11.com/bilgisayar/dizustu-bilgisayar";
+		for (int i = 0; i < 14; i++) {
+
+			if (i == 0) {
+				i++;
+			} else
+				url1 = url1 + "?pg=" + i;
+			System.out.println(url1);
+			System.out.println();
+
+			try {
+
+				final Document document = Jsoup.connect(url1).get();
+				Elements elements = document.getElementsByClass("pro");
+				for (org.jsoup.nodes.Element element : elements) {
+
+					// System.out.println(element.getElementsByTag("a").attr("href"));
+					urunLinkleri.add(element.getElementsByTag("a").attr("href"));
+					site.add("N11");
+
+				}
+				Elements fiyatElement = document.getElementsByClass("priceContainer ");
+
+				for (org.jsoup.nodes.Element element : fiyatElement) {
+
+					fiyatlar.add(element.getElementsByTag("ins").text());
+				}
+				
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		for (int j = 0; j < urunLinkleri.size(); j++) {
+			url1 = urunLinkleri.get(j);
+
+			try {
+				Document document = Jsoup.connect(url1).get();
+				Elements elements = document.getElementsByClass("proName");
+				for (org.jsoup.nodes.Element element : elements) {
+					urunTitles.add(element.text());
+
+				}
+				
+				
+
+				Elements imageElement = document.getElementsByClass("imgObj");
+
+				for (org.jsoup.nodes.Element element : imageElement) {
+					String imageLink = element.getElementsByTag("a").attr("href");
+					urunImage.add(imageLink);
+				}
+
+				Elements yildiz = document.getElementsByClass("ratingCont ");
+				for (org.jsoup.nodes.Element element : yildiz) {
+					yildizlar.add(element.getElementsByTag("strong").text());
+				}
+
+				Elements ozellikElement = document.getElementsByClass("unf-prop-context");
+				for (org.jsoup.nodes.Element element : ozellikElement) {
+					sadeceOzellikler.add(element.getElementsByClass("unf-prop-list-prop").text());
+					urunOzellikler.add(element.getElementsByTag("p").text());
+
+				}
+
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+
+			if (urunOzellikler.get(j).contains("Bellek Kapasitesi ")) {
+				indeks = urunOzellikler.get(j).indexOf("Bellek Kapasitesi ") + "Bellek Kapasitesi ".length();
+				ram.add(urunOzellikler.get(j).substring(indeks, indeks + 2).trim());
+
+			} else {
+				ram.add("-");
+
+			}
+
+			if (urunOzellikler.get(j).contains("Ekran Boyutu ")) {
+				indeks = urunOzellikler.get(j).indexOf("Ekran Boyutu ") + "Ekran Boyutu ".length();
+				ekranBoyutu.add(urunOzellikler.get(j).substring(indeks, urunOzellikler.get(j).indexOf("\"")).trim());
+
+			} else {
+				ekranBoyutu.add("-");
+
+			}
+
+			if ((urunOzellikler.get(j).contains("Model ")) && (urunOzellikler.get(j).contains("HDMI"))
+					&& (urunOzellikler.get(j).indexOf("HDMI") < urunOzellikler.get(j).indexOf("Marka "))) {
+				indeks = urunOzellikler.get(j).indexOf("Model ") + "Model ".length();
+				model.add(urunOzellikler.get(j).substring(indeks, urunOzellikler.get(j).indexOf("HDMI")).trim());
+
+			} else if ((urunOzellikler.get(j).contains("Model ") && urunOzellikler.get(j).contains("Marka "))) {
+				indeks = urunOzellikler.get(j).indexOf("Model ") + "Model ".length();
+				model.add(urunOzellikler.get(j).substring(indeks, urunOzellikler.get(j).indexOf("Marka ")).trim());
+
+			} else {
+				model.add("-");
+			}
+
+			indeks = 0;
+			if (urunOzellikler.get(j).contains("İşlemci Modeli ")) {
+				indeks = urunOzellikler.get(j).indexOf("İşlemci Modeli ") + "İşlemci Modeli ".length();
+				SubIslemci.add(urunOzellikler.get(j).substring(indeks, (urunOzellikler.get(j).length() - 1)));
+				if (SubIslemci.get(j).contains("Ryzen ")) {
+
+					indeks = SubIslemci.get(j).indexOf("-");
+					islemciNesil.add(SubIslemci.get(j).substring(indeks + 1, indeks + 2));
+					islemciTipi.add("Ryzen " + SubIslemci.get(j).substring(indeks - 1, indeks));
+				}
+				if (SubIslemci.get(j).contains("Celeron ")) {
+					islemciTipi.add("Celeron");
+					islemciNesil.add("-");
+				}
+				if (SubIslemci.get(j).contains("Intel ") && (!SubIslemci.get(j).contains("Celeron "))) {
+					indeks = SubIslemci.get(j).indexOf("-");
+					islemciTipi.add(SubIslemci.get(j).substring(indeks - 2, indeks));
+					islemciNesil.add(SubIslemci.get(j).substring(indeks + 1, indeks + 3));
+					if (!islemciNesil.get(j).contains("1")) {
+						String a = islemciNesil.get(j).substring(0, 1);
+						islemciNesil.remove(j);
+						islemciNesil.add(a);
+					}
+				}
+				if (SubIslemci.get(j).contains("M1")) {
+					islemciTipi.add("M1");
+					islemciNesil.add("-");
+				}
+				if (SubIslemci.get(j).contains("M2")) {
+					islemciTipi.add("M2");
+					islemciNesil.add("-");
+				}
+				if (SubIslemci.get(j).contains("Xeon")) {
+					islemciTipi.add("Xeon");
+					islemciNesil.add("-");
+				}
+				if (SubIslemci.get(j).contains("Pentium")) {
+					islemciTipi.add("Pentium");
+					islemciNesil.add("-");
+				}
+
+			} else {
+				islemciNesil.add("-");
+				islemciTipi.add("-");
+
+			}
+
+			if (urunOzellikler.get(j).contains("Disk Türü ")) {
+				indeks = urunOzellikler.get(j).indexOf("Disk Türü ") + "Disk Türü ".length();
+				String geciciStr = urunOzellikler.get(j).substring(indeks, indeks + 11);
+				if (geciciStr.contains("HDD - SSD")) {
+					int gecicindeks;
+					gecicindeks = urunOzellikler.get(j).indexOf("Disk Kapasitesi ") + "Disk Kapasitesi ".length();
+					Hdd.add(urunOzellikler.get(j).substring(gecicindeks, gecicindeks + 2).trim());
+					gecicindeks = urunOzellikler.get(j).indexOf("+ ", gecicindeks) + 2;
+					geciciStr = urunOzellikler.get(j).substring(gecicindeks, gecicindeks + 5);
+					geciciStr = geciciStr.replaceAll("\\D+", "");
+					int c;
+					c = Integer.parseInt(geciciStr);
+					Ssd.add(Integer.toString(c));
+				} else if (geciciStr.contains("HDD")) {
+					int gecicindeks;
+					gecicindeks = urunOzellikler.get(j).indexOf("Disk Kapasitesi ") + "Disk Kapasitesi ".length();
+					geciciStr = urunOzellikler.get(j).substring(gecicindeks, gecicindeks + 4);
+					geciciStr = geciciStr.replaceAll("\\D+", "");
+					int c;
+					c = Integer.parseInt(geciciStr);
+					Hdd.add(Integer.toString(c));
+					Ssd.add("-");
+				} else if (geciciStr.contains("SSD")) {
+					int gecicindeks;
+					gecicindeks = urunOzellikler.get(j).indexOf("Disk Kapasitesi ") + "Disk Kapasitesi ".length();
+					geciciStr = urunOzellikler.get(j).substring(gecicindeks, gecicindeks + 4);
+					geciciStr = geciciStr.replaceAll("\\D+", "");
+					int c;
+					c = Integer.parseInt(geciciStr);
+					Ssd.add(Integer.toString(c));
+					Hdd.add("-");
+				}
+
+			} else {
+				Hdd.add("-");
+				Ssd.add("-");
+			}
+
+			if (urunOzellikler.get(j).contains("Freedos") || urunOzellikler.get(j).contains("Dos"))
+				dos.add("FreeDOS");
+			else if (urunOzellikler.get(j).contains("Windows"))
+				dos.add("Windows");
+			else if (urunOzellikler.get(j).contains("Macos"))
+				dos.add("MacOS");
+			else if (urunOzellikler.get(j).contains("Linux"))
+				dos.add("Linux");
+			else if (urunOzellikler.get(j).contains("Ubuntu"))
+				dos.add("Ubuntu");
+			else
+				dos.add("-");
+			markalar.add(urunTitles.get(j).substring(0, urunTitles.get(j).indexOf(" ")));
+			markalar.set(j,  markalar.get(j).toUpperCase());
+			
+			ekranBoyutu.set(j, ekranBoyutu.get(j).replace(".",","));
+			  markalar.set(j,  markalar.get(j).toUpperCase());
+			  fiyatlar.set(j,fiyatlar.get(j).trim().replaceAll(" TL","") ) ;
+
+			islemciTipi.set(j, islemciTipi.get(j).replaceAll(" ", ""));
+			if(markalar.get(j).trim().equals("GAME"))
+				markalar.set(j, "GAME GARAJ");
+			
+			System.out.println("***********");
+			System.out.print("marka = " + markalar.get(j) + " ");
+			System.out.print(" model= " + model.get(j) + " ");
+			System.out.print("ekran = " + ekranBoyutu.get(j) + " ");
+			System.out.print("ram = " + ram.get(j) + " ");
+			System.out.print("ssd= " + Ssd.get(j) + " ");
+			System.out.print("hdd =" + Hdd.get(j) + " ");
+			System.out.print("puan =" + yildizlar.get(j) + " ");
+			System.out.print(" fiyat = " + fiyatlar.get(j) + " ");
+
+			System.out.print("tip= " + islemciTipi.get(j) + "  " + " nesil= " + islemciNesil.get(j));
+			System.out.println(" " + urunImage.get(j));
+			System.out.println();
+
+		}
+
+		int j; 
+		for (j= 0; j < urunTitles.size(); j++) {
+			Baglanti.DatabaseYazdirNotDuplicateFirst("model","name",model.get(j).trim());
+			int count = Baglanti.Count();
+			Baglanti.DatabaseYazdir(count,"marka",markalar.get(j).trim());
+			Baglanti.DatabaseYazdir(count,"ssd",Ssd.get(j).trim());
+			Baglanti.DatabaseYazdir(count,"hdd", Hdd.get(j).trim());
+			Baglanti.DatabaseYazdir(count,"islemci_tipi",islemciTipi.get(j).trim());
+			Baglanti.DatabaseYazdir(count,"islemci_nesli",islemciNesil.get(j).trim()); 
+			Baglanti.DatabaseYazdir(count,"isletim_sistemi",dos.get(j).trim());
+			Baglanti.DatabaseYazdir(count,"ram",ram.get(j).trim());
+			Baglanti.DatabaseYazdir(count,"ekran",ekranBoyutu.get(j).trim());
+			
+			Baglanti.DatabaseYazdir(count,"puan",yildizlar.get(j).trim());
+			Baglanti.DatabaseYazdir(count,"site",site.get(j).trim());
+			Baglanti.DatabaseModelSite(site.get(j).trim());
+			Baglanti.DatabaseYazdirNotDuplicate(count,"model","fiyat",fiyatlar.get(j).trim());
+			Baglanti.DatabaseYazdirNotDuplicate(count,"model","image_url",urunImage.get(j).trim());
+			Baglanti.DatabaseYazdirNotDuplicate(count,"model","urun_url",urunLinkleri.get(j).trim());
+			Baglanti.DatabaseYazdirNotDuplicate(count,"model","urun_title",urunTitles.get(j).trim());
+			
+		}
+		
+		
+	}
+
+}
+
+
+
+
+
+
+
+
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.lang.model.element.Element;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
+
+
+
+
+public class Trendyol {
+
+	public static void main(String[] args) {
+
+		ArrayList<String> urunOzellikler = new ArrayList<String>();
+		ArrayList<String> urunTitles = new ArrayList<String>();
+		ArrayList<String> urunLinkleri = new ArrayList<String>();
+		ArrayList<String> markalar = new ArrayList<String>();
+		ArrayList<String> fiyatlar = new ArrayList<String>();
+		ArrayList<String> site = new ArrayList<String>();
+		ArrayList<String> sadeceOzellikler = new ArrayList<String>();
+		ArrayList<String> ekranBoyutu = new ArrayList<String>();
+		ArrayList<String> islemciTipi = new ArrayList<String>();
+		ArrayList<String> islemciNesil = new ArrayList<String>();
+		ArrayList<String> model = new ArrayList<String>();
+		ArrayList<String> dos = new ArrayList<String>();
+		ArrayList<String> ram = new ArrayList<String>();
+		ArrayList<String> Ssd = new ArrayList<String>();
+		ArrayList<String> Hdd = new ArrayList<String>();
+		ArrayList<String> urunImage = new ArrayList<String>();
+		ArrayList<String> yildizlar = new ArrayList<String>();// YILDIZ CEKİLMİYOR
+		int indeks;
+		String mainUrl = "https://www.trendyol.com";
+		String url1 = "https://www.trendyol.com/laptop-x-c103108";
+		for (int i = 13; i < 14; i++) {
+
+			if (i == 0) {
+				i++;
+			} else
+				url1 = url1 + "?pi=" + i;
+			System.out.println(url1);
+			System.out.println();
+			
+			
+
+			try {
+
+				final Document document = Jsoup.connect(url1).get();
+				Elements elements = document.getElementsByClass("p-card-wrppr with-campaign-view");
+				for (org.jsoup.nodes.Element element : elements) {
+					// System.out.println( element.getElementsByClass("list-ul").text());
+
+					urunLinkleri.add(mainUrl + element.getElementsByTag("a").attr("href"));
+					site.add("Trendyol");
+					yildizlar.add("-");
+
+				}
+				
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			
+
+		}
+		for (int j = 0; j < urunLinkleri.size(); j++) {
+			url1 = urunLinkleri.get(j);
+			
+			
+			
+			
+			
+			
+
+			try {
+				
+				Document document = Jsoup.connect(url1).get();
+				Elements elements = document.getElementsByClass("pr-new-br");
+				for (org.jsoup.nodes.Element element : elements) {
+
+					urunTitles.add(element.text());
+					markalar.add(element.getElementsByTag("a").text());
+
+				}
+				Elements fiyatElement = document.getElementsByClass("product-price-container");
+
+				for (org.jsoup.nodes.Element element : fiyatElement) {
+					fiyatlar.add(element.getElementsByClass("prc-dsc").text());
+
+	//				System.out.println(fiyatlar.get(j));
+				}
+				Elements ozellikElement = document.getElementsByClass("detail-attr-container");
+				for (org.jsoup.nodes.Element element : ozellikElement) {
+			sadeceOzellikler.add(element.getElementsByTag("b").text());
+	urunOzellikler.add(element.getElementsByTag("span").text());
+	
+				 	
+	//System.out.println( element.getElementsByTag("span").text());
+	//System.out.println(element.getElementsByTag("b").text());
+
+				}
+				
+				Elements imageElement = document.getElementsByTag("img");
+				int k=0;
+				for (org.jsoup.nodes.Element element : imageElement) {
+				String imageLink =element.attr("src").toString();
+				if(k==1) {
+					urunImage.add(imageLink);
+				} 
+				k++;
+				}
+			
+				
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		System.out.println(	urunOzellikler.get(j));
+			
+			if(urunOzellikler.get(j).contains("inç") )
+			{indeks = urunOzellikler.get(j).indexOf("inç");
+			String ekran = urunOzellikler.get(j).substring(indeks-4, indeks-1);
+			if (ekran.contains(",")) {
+			ekran ="1"+ ekran;
+			ekranBoyutu.add(ekran);
+			} else {
+				ekran = ekran.trim();
+				ekranBoyutu.add(ekran);
+			}
+			}else {
+				ekranBoyutu.add("-");
+
+			}
+			//System.out.println(ekranBoyutu.get(j));
+			
+			if (urunOzellikler.get(j).contains("Core")) {
+				indeks = urunOzellikler.get(j).indexOf("Core") + 5;
+				islemciTipi.add(urunOzellikler.get(j).substring(indeks, indeks + 2));
+				if(urunOzellikler.get(j).contains(". Nesil")) {
+					indeks=urunOzellikler.get(j).indexOf(". Nesil")-2;
+					
+					islemciNesil.add(urunOzellikler.get(j).substring(indeks, indeks+2).trim());
+					
+				}else {
+					islemciNesil.add("-");
+					
+				}
+				
+				
+			}else if(!(urunOzellikler.get(j).contains("Core"))&&  (urunOzellikler.get(j).contains("Intel"))) {
+				islemciTipi.add("Celeron");
+				if(urunOzellikler.get(j).contains(". Nesil")) {
+					indeks=(urunOzellikler.get(j).indexOf(". Nesil")-2);
+					islemciNesil.add(urunOzellikler.get(j).substring(indeks, indeks+2).trim());
+					
+				}else {
+					islemciNesil.add("-");
+					
+				}
+	
+			}
+			
+			else if (urunOzellikler.get(j).contains("Ryzen")&& !urunOzellikler.get(j).endsWith("Ryzen") ) {
+				indeks = urunOzellikler.get(j).indexOf("Ryzen");
+				islemciTipi.add(urunOzellikler.get(j).substring(indeks, indeks + 7));
+				if(urunOzellikler.get(j).contains(". Nesil")) {
+					indeks=urunOzellikler.get(j).indexOf(". Nesil")-2;
+					islemciNesil.add(urunOzellikler.get(j).substring(indeks, indeks+2).trim());
+					
+				}else {
+					islemciNesil.add("-");
+					
+				}
+				
+				
+			}else if(urunOzellikler.get(j).endsWith("Ryzen"))
+			{
+				islemciNesil.add("-");
+				islemciTipi.add("-");
+			}
+			else if (urunOzellikler.get(j).contains("M1")) {
+				islemciTipi.add("M1");
+				islemciNesil.add("-");
+				
+			} else if (urunOzellikler.get(j).contains("M2")) {
+				islemciTipi.add("M2");
+				islemciNesil.add("-");
+
+			} else {
+				islemciTipi.add("-");
+				islemciNesil.add("-");
+				
+			}
+			
+		//System.out.println(islemciTipi.get(j));
+			//System.out.println(islemciNesil.get(j));
+			//System.out.println();
+
+ indeks =markalar.get(j).length()+1;
+ int geciciIndeks= urunTitles.get(j).indexOf(" ", indeks);
+ model.add(urunTitles.get(j).substring(indeks,geciciIndeks ));
+ //System.out.println(model.get(j));
+		
+ 
+ if (urunOzellikler.get(j).contains("Free Dos") || urunOzellikler.get(j).contains("Dos"))
+		dos.add("FreeDOS");
+	else if (urunOzellikler.get(j).contains("Windows") || urunOzellikler.get(j).contains("W11H")
+			|| urunOzellikler.get(j).contains("W10") || urunOzellikler.get(j).contains("W11")
+			|| urunOzellikler.get(j).contains("Win10") || urunOzellikler.get(j).contains("W10H")
+			|| urunOzellikler.get(j).contains("Win11") || urunOzellikler.get(j).contains("WIN11"))
+		dos.add("Windows");
+	else if (urunOzellikler.get(j).contains("Mac Os"))
+		dos.add("MacOS");
+	else if (urunOzellikler.get(j).contains("Linux"))
+		dos.add("Linux");
+	else if (urunOzellikler.get(j).contains("Ubuntu"))
+		dos.add("Ubuntu");
+	else
+		dos.add("-");
+ 
+ 
+		//System.out.println(dos.get(j));
+ 
+ if(urunOzellikler.get(j).contains("(Sistem Belleği) ")) {
+	 indeks = urunOzellikler.get(j).indexOf("(Sistem Belleği) ")+ "(Sistem Belleği) ".length();
+	 ram.add(urunOzellikler.get(j).substring(indeks, indeks+2).trim());
+	
+	 
+ }else {
+	 ram.add("-");
+	 
+ }
+ //System.out.println(ram.get(j));
+ 
+ if(urunOzellikler.get(j).contains("SSD Kapasitesi ")) {
+	indeks=urunOzellikler.get(j).indexOf("SSD Kapasitesi ") + "SSD Kapasitesi ".length();
+	String cleaner= urunOzellikler.get(j).substring(indeks, indeks+3);
+	if(cleaner.contains("Yok") || cleaner.contains("SSD")) {
+		Ssd.add("-");
+	}else {
+	int b;
+	cleaner=cleaner.replaceAll("\\D+", "");
+	 b= Integer.parseInt(cleaner);
+	 Ssd.add(Integer.toString(b));
+	
+	}
+	
+	 if(urunOzellikler.get(j).contains("Hard Disk Kapasitesi ")) {
+			indeks=urunOzellikler.get(j).indexOf("Hard Disk Kapasitesi ") + "Hard Disk Kapasitesi ".length();
+			 cleaner= urunOzellikler.get(j).substring(indeks, indeks+3).trim();
+			if(cleaner.contains("Yok") || cleaner.contains("HDD")) {
+				Hdd.add("-");
+			}else {
+			int b;
+			cleaner=cleaner.replaceAll("\\D+", "");
+			 b= Integer.parseInt(cleaner);
+			 Hdd.add(Integer.toString(b));}}
+	 else {
+		 Hdd.add("-");
+	 }
+	 
+	 
+ }else if(Hdd.get(j).contains("-") && urunOzellikler.get(j).contains("Hard Disk Kapasitesi ")) {
+		indeks=urunOzellikler.get(j).indexOf("Hard Disk Kapasitesi ") + "Hard Disk Kapasitesi ".length();
+		String cleaner= urunOzellikler.get(j).substring(indeks, indeks+3).trim();
+		if(cleaner.contains("Yok") || cleaner.contains("HDD")) {
+			Hdd.remove(j);
+			Hdd.add("-");
+		}else {
+		int b;
+		cleaner=cleaner.replaceAll("\\D+", "");
+		 b= Integer.parseInt(cleaner);
+		 Hdd.add(Integer.toString(b));
+	 
+		}
+	 
+ }else {
+	 Hdd.add("-");
+	 Ssd.add("-");
+ }
+ 
+ ekranBoyutu.set(j, ekranBoyutu.get(j).replace(".",","));
+  markalar.set(j,  markalar.get(j).toUpperCase());
+  fiyatlar.set(j,fiyatlar.get(j).trim().replaceAll(" TL","") ) ;
+
+islemciTipi.set(j, islemciTipi.get(j).replaceAll(" ", ""));
+ System.out.println("***********");
+	System.out.print("marka = " + markalar.get(j)+ " ");
+	System.out.print(" model= " + model.get(j)+ " ");
+	System.out.print("ekran = "+ ekranBoyutu.get(j) + " " );
+	System.out.print("ram = "+ ram.get(j)+" " );
+	System.out.print("ssd= "+Ssd.get(j)+" " );
+	System.out.print( "hdd =" +Hdd.get(j)+ " ");
+	System.out.print("puan =" + yildizlar.get(j) + " ");
+	System.out.print(" fiyat = " + fiyatlar.get(j) +" ");
+	
+
+	System.out.print("tip= "+ islemciTipi.get(j)+"  " +" nesil= "+ islemciNesil.get(j));
+	System.out.println(urunImage.get(j));
+	System.out.println();
+		
+ 
+ 
+		
+		
+		
+		}
+
+
+		int j; 
+	for (j= 0; j < urunTitles.size(); j++) {
+
+		Baglanti.DatabaseYazdirNotDuplicateFirst("model","name",model.get(j).trim());
+		int count = Baglanti.Count();
+		Baglanti.DatabaseYazdir(count,"marka",markalar.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"ssd",Ssd.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"hdd", Hdd.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"islemci_tipi",islemciTipi.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"islemci_nesli",islemciNesil.get(j).trim()); 
+		Baglanti.DatabaseYazdir(count,"isletim_sistemi",dos.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"ram",ram.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"ekran",ekranBoyutu.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"puan",yildizlar.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"site",site.get(j).trim());
+		Baglanti.DatabaseModelSite(site.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","fiyat",fiyatlar.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","image_url",urunImage.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","urun_url",urunLinkleri.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","urun_title",urunTitles.get(j).trim());
+		
+	}
+	
+		
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.swing.plaf.synth.SynthOptionPaneUI;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import javax.lang.model.element.Element;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+public class Teknosa {
+
+	public static void main(String[] args) {
+		
+	//	String url = "https://www.teknosa.com/laptop-notebook-c-116004";"https://www.teknosa.com/laptop-notebook-c-116004?s=%3Arelevance&page="+i;
+		 ArrayList<String> urunLinkleri = new ArrayList<String>();
+		 ArrayList<String> urunTitles = new ArrayList<String>();
+		 ArrayList<String> fiyatlar = new ArrayList<String>();
+		 ArrayList<String> markalar = new ArrayList<String>();
+		 ArrayList<String> yildizlar = new ArrayList<String>();
+		 ArrayList<String> dos = new ArrayList<String>();
+		 ArrayList<String> site = new ArrayList<String>();
+		 ArrayList<String> ekranBoyutu = new ArrayList<String>();
+		 ArrayList<String> ram = new ArrayList<String>();
+		 ArrayList<String> Ssd = new ArrayList<String>();
+		 ArrayList<String> Hdd = new ArrayList<String>();
+		 ArrayList<String> markasizTitles = new ArrayList<String>();
+		 ArrayList<String> model = new ArrayList<String>();
+		 ArrayList<String> islemci = new ArrayList<String>();
+		 ArrayList<String> islemciTipi =new ArrayList<String>();
+		 ArrayList<String> islemciNesil =new ArrayList<String>();
+		 ArrayList<String> urunImage =new ArrayList<String>();
+		 int boslukIndeksi,indeks;
+		 String ssdBoyut = "-";
+		 String cleaner;
+		 int b;
+		 String hddBoyut = "-";
+		 int sonIndeks,basIndeks;
+		  
+		 String mainUrl ="https://www.teknosa.com/";
+		 for(int i=18;i<21;i++) {
+		
+			String url1;
+			if(i==0)
+				url1="https://www.teknosa.com/laptop-notebook-c-116004";
+			else
+				url1="https://www.teknosa.com/laptop-notebook-c-116004?s=%3Arelevance&page="+i;
+			System.out.println(url1);
+		  
+		try {
+			final Document document = Jsoup.connect(url1).get();
+			Elements elements = document.getElementsByClass("prd-link");
+			for (org.jsoup.nodes.Element element : elements) {
+				// System.out.println( element.getElementsByClass("list-ul").text());
+
+				urunLinkleri.add(mainUrl + element.attr("href").toString());
+				
+				site.add("Teknosa");
+				yildizlar.add("0");
+
+			}
+		
+			
+			 
+			 Elements images = document.select("#product-item > div > div.prd-media > figure > img"); 
+			 int k=0;
+			 for (org.jsoup.nodes.Element image : images) {
+				  if(k<4) {
+					 urunImage.add(image.attr("src"));
+				  }
+				  
+				  else {
+					  urunImage.add(image.attr("data-srcset"));
+				  }
+				k++ ;
+			 }							
+			
+			 
+	} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		}
+	
+	for (int i = 0; i < urunLinkleri.size(); i++) {
+		
+		
+		String url = mainUrl+urunLinkleri.get(i);
+		System.out.println(url);
+		try {
+			Document document = Jsoup.connect(url).get();
+			Elements marka = document.getElementsByTag("h1");
+			for (org.jsoup.nodes.Element element : marka) {
+				urunTitles.add(element.text().toString());
+									markalar.add(element.getElementsByTag("b").text());
+									
+								}
+			
+			Elements fiyatElement = document.getElementsByClass("pdp-prc2");
+
+			for (org.jsoup.nodes.Element element : fiyatElement) {
+
+			fiyatlar.add(element.getElementsByTag("span").first().text());
+			break;
+			}
+			
+			System.out.println( fiyatlar.get(i));
+			
+			
+
+			
+			
+			
+		}
+		
+		
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		if (urunTitles.get(i).contains("FreeDOS")||urunTitles.get(i).contains("FreeDos"))
+			dos.add("FreeDOS");
+		else if(urunTitles.get(i).contains("Windows")|| urunTitles.get(i).contains("W11H")||
+				urunTitles.get(i).contains("W10")||urunTitles.get(i).contains("W11")||
+				urunTitles.get(i).contains("Win10") || urunTitles.get(i).contains("W10H") ||urunTitles.get(i).contains("Win11")||urunTitles.get(i).contains("WIN11"))
+			dos.add("Windows");
+		else if(urunTitles.get(i).contains("MacOS")||urunTitles.get(i).contains("macOS"))
+			dos.add("MacOS");
+		else if(urunTitles.get(i).contains("Linux"))
+		dos.add("Linux");
+		else if(urunTitles.get(i).contains("Ubuntu"))
+			dos.add("Ubuntu");
+		else dos.add("-");
+		//TODO koşul koy tırnak olmayan var
+		if(urunTitles.get(i).contains("\"")) {
+		String ekran = urunTitles.get(i).subSequence((urunTitles.get(i).indexOf("\"")-4), (urunTitles.get(i).indexOf("\""))).toString();
+		if(ekran.contains(" "))
+		{boslukIndeksi = ekran.indexOf(" ");
+		ekranBoyutu.add(ekran.substring(boslukIndeksi+1));
+	 }
+		else {
+			ekranBoyutu.add(ekran);
+		} 
+	//System.out.println(ekranBoyutu.get(i));
+		}else {
+			ekranBoyutu.add("-");
+			
+		}
+		//TODO Ram kelimesi olmayan var koşul koy
+		if(urunTitles.get(i).contains("RAM")) {
+		String rams = urunTitles.get(i).subSequence((urunTitles.get(i).indexOf("RAM")-6), (urunTitles.get(i).indexOf("RAM"))).toString();
+	String clean=	rams.replaceAll("\\D+","");
+	
+	int a= Integer.parseInt(clean);
+	ram.add(Integer.toString(a));
+//System.out.println(ram.get(i));	
+	}else if(urunTitles.get(i).contains("Ram")) {
+		String rams = urunTitles.get(i).subSequence((urunTitles.get(i).indexOf("Ram")-6), (urunTitles.get(i).indexOf("Ram"))).toString();
+		String clean=	rams.replaceAll("\\D+","");
+		
+		int a= Integer.parseInt(clean);
+		ram.add(Integer.toString(a));
+		
+		
+	}
+	else {
+		ram.add("-");
+		
+	}
+		
+		
+	//TODO SSD Ssd HDD Hdd gibi kayıtlar var ikisi birlikte olanda var koşulları ayarla 
+	if(urunTitles.get(i).contains("SSD") && urunTitles.get(i).contains("HDD"))
+	{
+		ssdBoyut = urunTitles.get(i).subSequence((urunTitles.get(i).indexOf("SSD")-7), (urunTitles.get(i).indexOf("SSD"))).toString();
+		cleaner=	ssdBoyut.replaceAll("\\D+","");
+		b= Integer.parseInt(cleaner);
+		Ssd.add(Integer.toString(b));
+		 hddBoyut = urunTitles.get(i).subSequence((urunTitles.get(i).indexOf("HDD")-7), (urunTitles.get(i).indexOf("HDD"))).toString();
+		cleaner = hddBoyut.replaceAll("\\D+","");
+		b = Integer.parseInt(cleaner);
+		Hdd.add(Integer.toString(b));
+		
+	}
+	else if(urunTitles.get(i).contains("Ssd")&& urunTitles.get(i).contains("Hdd")) {
+		ssdBoyut = urunTitles.get(i).subSequence((urunTitles.get(i).indexOf("Ssd")-7), (urunTitles.get(i).indexOf("Ssd"))).toString();
+		cleaner=	ssdBoyut.replaceAll("\\D+","");
+		 b= Integer.parseInt(cleaner);
+		Ssd.add(Integer.toString(b));
+	  hddBoyut = urunTitles.get(i).subSequence((urunTitles.get(i).indexOf("Hdd")-7), (urunTitles.get(i).indexOf("Hdd"))).toString();
+		cleaner = hddBoyut.replaceAll("\\D+","");
+		b = Integer.parseInt(cleaner);
+		Hdd.add(Integer.toString(b));
+		
+		
+		
+	}
+	
+	else if(urunTitles.get(i).contains("SSD")) {
+		if(urunTitles.get(i).contains("NVMe")) {
+			Ssd.add("256");
+			Hdd.add("-");
+		}
+		else {
+	ssdBoyut = urunTitles.get(i).subSequence((urunTitles.get(i).indexOf("SSD")-7), (urunTitles.get(i).indexOf("SSD"))).toString();
+	cleaner=ssdBoyut.replaceAll("\\D+","");
+	 b= Integer.parseInt(cleaner);
+	Ssd.add(Integer.toString(b));
+	Hdd.add("-");}
+	
+	}
+	else if(urunTitles.get(i).contains("Ssd")){
+		ssdBoyut = urunTitles.get(i).subSequence((urunTitles.get(i).indexOf("Ssd")-7), (urunTitles.get(i).indexOf("Ssd"))).toString();
+		cleaner=	ssdBoyut.replaceAll("\\D+","");
+		 b= Integer.parseInt(cleaner);
+		Ssd.add(Integer.toString(b));
+		Hdd.add("-");
+		
+		
+		
+	}
+	
+	
+	else if (urunTitles.get(i).contains("HDD") )
+	{
+		hddBoyut = urunTitles.get(i).substring((urunTitles.get(i).indexOf("HDD")-7), (urunTitles.get(i).indexOf("HDD")));	
+	 cleaner=	hddBoyut.replaceAll("\\D+","");
+	 b= Integer.parseInt(cleaner);
+	Hdd.add(Integer.toString(b));
+Ssd.add("-");
+	}
+	else if(urunTitles.get(i).contains("Hdd")) {
+		hddBoyut = urunTitles.get(i).substring((urunTitles.get(i).indexOf("Hdd")-7), (urunTitles.get(i).indexOf("Hdd")));	
+		 cleaner=	hddBoyut.replaceAll("\\D+","");
+		 b= Integer.parseInt(cleaner);
+	 Hdd.add(Integer.toString(b));
+	 Ssd.add("-");
+		}
+	else {
+		Ssd.add(ssdBoyut);
+		Hdd.add(hddBoyut);
+		
+		
+	}
+
+	boslukIndeksi = urunTitles.get(i).indexOf(" ");
+	
+markasizTitles.add(urunTitles.get(i).substring(boslukIndeksi+1));
+	
+	
+	if(markasizTitles.get(i).contains("Intel")) {
+	indeks = markasizTitles.get(i).indexOf("Intel") - 1;
+	model.add(markasizTitles.get(i).substring(0, indeks));
+	
+	}else if(markasizTitles.get(i).contains("i7") &&(!markasizTitles.get(i).contains("Intel"))) {
+		
+		
+		indeks = markasizTitles.get(i).indexOf("i7") - 1;
+		model.add(markasizTitles.get(i).substring(0, indeks));
+		
+	}
+	else if(markasizTitles.get(i).contains("AMD")) {
+		indeks = markasizTitles.get(i).indexOf("AMD") - 1;
+		model.add(markasizTitles.get(i).substring(0, indeks));
+		}
+	else if(markasizTitles.get(i).contains("M1")) {
+	
+		indeks = markasizTitles.get(i).indexOf("M1") - 1;
+		model.add(markasizTitles.get(i).substring(0, indeks));
+		}
+	else if(markasizTitles.get(i).contains("M2")) {
+		indeks = markasizTitles.get(i).indexOf("M2") - 1;
+		model.add(markasizTitles.get(i).substring(0, indeks));
+		}
+	else if(markasizTitles.get(i).contains("Ryzen") &&  (!markasizTitles.get(i).contains("AMD")))
+	{
+		indeks = markasizTitles.get(i).indexOf("Ryzen") - 1;
+		model.add(markasizTitles.get(i).substring(0, indeks));
+		}
+	else model.add("-");
+	
+	
+	
+
+	sonIndeks =markasizTitles.get(i).indexOf("\"")-3;
+	if(sonIndeks ==-4)
+	{islemci.add("-");
+		islemciTipi.add("-");
+		islemciNesil.add("-");
+	}
+	else if(markasizTitles.get(i).contains("Intel")) {
+   
+		basIndeks = markasizTitles.get(i).indexOf("Intel");
+	    islemci.add( markasizTitles.get(i).substring(basIndeks, sonIndeks));
+	    int islemciBasIndeks= islemci.get(i).indexOf("i");
+	    if(islemciBasIndeks==-1) {
+	    islemciTipi.add(islemci.get(i));
+	    islemciNesil.add("-");
+	    }
+	    else if((islemciBasIndeks+5)> islemci.get(i).length())
+	    {
+	    	islemciTipi.add(islemci.get(i).substring(islemciBasIndeks, islemciBasIndeks+2));
+	    	 islemciNesil.add("-");
+	    }
+	    else {
+	    islemciTipi.add(islemci.get(i).substring(islemciBasIndeks, islemciBasIndeks+2));
+	    islemciNesil.add(islemci.get(i).substring(islemciBasIndeks+3, islemciBasIndeks+5));
+	    }
+	}
+else if(markasizTitles.get(i).contains("i7") &&(!markasizTitles.get(i).contains("Intel"))) {
+		
+	basIndeks = markasizTitles.get(i).indexOf("i7");
+		islemci.add(markasizTitles.get(i).substring(basIndeks, sonIndeks));
+		int islemciBasIndeks= islemci.get(i).indexOf("i");
+		islemciTipi.add(islemci.get(i).substring(islemciBasIndeks, islemciBasIndeks+2));
+		islemciNesil.add(islemci.get(i).substring(islemciBasIndeks+3, islemciBasIndeks+5));
+		
+	}else if(markasizTitles.get(i).contains("AMD"))
+	{
+		
+		basIndeks = markasizTitles.get(i).indexOf("AMD");
+		islemci.add(markasizTitles.get(i).substring(basIndeks, sonIndeks));
+		if(islemci.get(i).contains("Ryzen")) {
+			int islemciBasIndeks= islemci.get(i).indexOf("Ryzen");
+			islemciTipi.add(islemci.get(i).substring(islemciBasIndeks, islemciBasIndeks+7));
+			islemciNesil.add(islemci.get(i).substring(islemciBasIndeks+8, islemciBasIndeks+9));
+		}else {
+			islemciTipi.add("-");
+			islemciNesil.add("-");
+		}
+		
+		
+		}
+	else if(markasizTitles.get(i).contains("M1")) {
+		basIndeks = markasizTitles.get(i).indexOf("M1");
+		islemci.add(markasizTitles.get(i).substring(basIndeks, sonIndeks));
+		int islemciBasIndeks=islemci.get(i).indexOf("M1");
+		islemciTipi.add(islemci.get(i).substring(islemciBasIndeks, islemciBasIndeks+2));
+		islemciNesil.add("-");
+	}
+	else if(markasizTitles.get(i).contains("M2")) {
+		basIndeks = markasizTitles.get(i).indexOf("M2");
+		islemci.add(markasizTitles.get(i).substring(basIndeks, sonIndeks));
+		int islemciBasIndeks=islemci.get(i).indexOf("M2");
+		islemciTipi.add(islemci.get(i).substring(islemciBasIndeks, islemciBasIndeks+2));
+		islemciNesil.add("-");
+	}
+	else if(markasizTitles.get(i).contains("Ryzen") &&  (!markasizTitles.get(i).contains("AMD")))
+	{
+		basIndeks = markasizTitles.get(i).indexOf("Ryzen");
+		islemci.add(markasizTitles.get(i).substring(basIndeks, sonIndeks));
+		int islemciBasIndeks= islemci.get(i).indexOf("Ryzen");
+		islemciTipi.add(islemci.get(i).substring(islemciBasIndeks, islemciBasIndeks+7));
+		islemciNesil.add(islemci.get(i).substring(islemciBasIndeks+8, islemciBasIndeks+9));
+		
+		
+	}
+	else { islemci.add("-");
+	islemciTipi.add("-");
+	islemciNesil.add("-");
+	}
+	ekranBoyutu.get(i).replaceAll(",",".");	
+	markalar.set(i,  markalar.get(i).toUpperCase());
+	urunLinkleri.set(i, mainUrl.concat(urunLinkleri.get(i)));
+	if(Hdd.get(i).trim().equals("500 GB"))
+		Hdd.set(i, "500");
+	if(islemciNesil.get(i).trim().equals("a"))
+		islemciNesil.set(i, "11");
+	if(islemciTipi.get(i).trim().equals("Intel Celeron N4020 1"))
+		islemciTipi.set(i, "Celeron");
+	if(islemciTipi.get(i).trim().equals("Ryzen5"))
+		islemciTipi.set(i, "Ryzen 5");
+	if(islemciTipi.get(i).trim().equals("Intel Core I5 1135G7 1")||islemciTipi.get(i).trim().equals("id"))
+		islemciTipi.set(i, "i5");
+	if(Ssd.get(i).trim().equals("256 GB"))
+		Ssd.set(i, "256");
+	
+	
+	
+	islemciTipi.set(i, islemciTipi.get(i).replaceAll(" ", ""));
+	ekranBoyutu.set(i, ekranBoyutu.get(i).replace(".",","));
+	  fiyatlar.set(i,fiyatlar.get(i).trim().replaceAll(" TL","") ) ;
+	  if(Ssd.get(i).contains("GB"))
+		  Ssd.set(i,Ssd.get(i).replace("GB",""));
+	  if(islemciTipi.get(i).trim().equals("ic"))
+			islemciTipi.set(i, "i5");
+	  if(Ssd.get(i).trim().contains("M 2 TB"))
+		  Ssd.set(i,"2");
+	  if(Ssd.get(i).trim().contains("1 TB"))
+		  Ssd.set(i,"1");
+	  if(Hdd.get(i).trim().contains("1 TB") )
+		  Hdd.set(i,"1");
+	  if(islemciNesil.get(i).trim().equals("52"))
+			islemciNesil.set(i, "5");
+	  if(islemciNesil.get(i).trim().equals("1"))
+			islemciNesil.set(i, "11");
+	  if(islemciNesil.get(i).trim().equals("2"))
+			islemciNesil.set(i, "3");
+	  if(islemciNesil.get(i).trim().equals("XE"))
+			islemciNesil.set(i, "12");
+	  if(islemciNesil.get(i).trim().equals("7"))
+			islemciNesil.set(i, "4");
+	  if(islemciTipi.get(i).trim().equals("IntelI7-1260P16GBRAM1TBSSD"))
+			islemciTipi.set(i, "i7");
+	  if(islemciTipi.get(i).trim().equals("Ryzen3-"))
+			islemciTipi.set(i, "Ryzen3");
+	  if(islemciTipi.get(i).trim().equals("is")&& markalar.get(i).trim().equals("HUAWEİ"))
+			islemciTipi.set(i, "i7");
+	  if(islemciTipi.get(i).trim().equals("is")&& !markalar.get(i).trim().equals("HUAWEİ"))
+			islemciTipi.set(i, "i5");
+	  
+	System.out.println("***********");
+	System.out.println(i);
+	System.out.print("marka = " + markalar.get(i)+ " ");
+	System.out.print(" model= " + model.get(i)+ " ");
+	System.out.print("ekran = "+ ekranBoyutu.get(i) + " " );
+	System.out.print("ram = "+ ram.get(i)+" " );
+	System.out.print("ssd= "+Ssd.get(i)+" " );
+	System.out.print( "hdd =" +Hdd.get(i)+ " ");
+	System.out.print("puan =" + yildizlar.get(i) + " ");
+	System.out.print(" fiyat = " + fiyatlar.get(i) +" ");
+	
+
+	System.out.print("tip= "+ islemciTipi.get(i)+"  " +" nesil= "+ islemciNesil.get(i));
+	System.out.println(urunImage.get(i));
+	System.out.println();
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	}
+	
+	
+	 
+	for (int j= 0; j < urunTitles.size(); j++) {
+
+		Baglanti.DatabaseYazdirNotDuplicateFirst("model","name",model.get(j).trim());
+		int count = Baglanti.Count();
+		Baglanti.DatabaseYazdir(count,"marka",markalar.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"ssd",Ssd.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"hdd", Hdd.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"islemci_tipi",islemciTipi.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"islemci_nesli",islemciNesil.get(j).trim()); 
+		Baglanti.DatabaseYazdir(count,"isletim_sistemi",dos.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"ram",ram.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"ekran",ekranBoyutu.get(j).trim());
+		
+		Baglanti.DatabaseYazdir(count,"puan",yildizlar.get(j).trim());
+		Baglanti.DatabaseYazdir(count,"site",site.get(j).trim());
+		Baglanti.DatabaseModelSite(site.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","fiyat",fiyatlar.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","image_url",urunImage.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","urun_url",urunLinkleri.get(j).trim());
+		Baglanti.DatabaseYazdirNotDuplicate(count,"model","urun_title",urunTitles.get(j).trim());
+		
+	}
+	
+		
+	}
+}
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <style>
+        thead {
+            background-color: darkgray;
+        }
+
+        h1 {
+            background-color: lightblue;
+        }
+
+        .table {
+            position: absolute;
+            margin-left: 30%;
+            width: 70%;
+            background-color: violet;
+
+        }
+
+        #filtrele {
+            position: absolute;
+            margin-bottom: 10%;
+            margin-right: 0%;
+            margin-left: 0%;
+            width: 150px;
+        }
+
+        h2 {
+
+            background-color: azure;
+        }
+
+        section {
+            background-color: antiquewhite;
+        }
+
+        body {
+            background-color: antiquewhite;
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 style="text-align: center;">Ürün Listesi </h1>
+    <nav>
+        <a href="anasayfa.php?siralama= order by fiyat desc"><button style="color: coral;" style="background-color: darkviolet;">Azalan Fiyat</button> </a>
+        <a href="anasayfa.php?siralama= order by fiyat asc"> <button style="color: blue;">Artan Fiyat</button> </a>
+    </nav>
+    <?php session_start();
+    //$_SESSION['sql_filtre'] = "SELECT * from model";
+    $sql_filtrelenmis = $_SESSION['sql_filtre'];
+    // echo $sql_filtrelenmis;
+
+    //
+    ?>
+    <table class="table" id="table" border="1">
+        <thead style="text-align: center; ">
+            <tr>
+                <th>Resim</th>
+                <th>Ürün Başlığı</th>
+                <th>Site</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+
+            $siralama = htmlspecialchars($_GET['siralama']);
+            $_SESSION['siralama']  = $siralama;
+            $servername = "localhost";
+            $username = "root";
+            $password = "Mysql123";
+            $database = "pcdb1";
+            $connection = new mysqli($servername, $username, $password, $database);
+            if ($connection->connect_error) {
+                die("connection Failed" . $connection->connect_error);
+            }
+
+            $sql = $sql_filtrelenmis . $siralama;
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+
+                $modelid = $row["id"];
+                $sorgu  = "SELECT * FROM model where id =" . $modelid;
+                $resultt = $connection->query($sorgu);
+
+                if (!$resultt) {
+                    die("Invalid Query : " . $connection->error);
+                }
+                while ($roww = $resultt->fetch_assoc()) {
+
+                    $img_url = $roww["image_url"];
+                    $urun_url = $roww["urun_url"];
+                    $urun_title = $roww["urun_title"];
+                    $sql_site = "SELECT name FROM site WHERE id= (SELECT site_id FROM model_site WHERE model_id = ($modelid))";
+                    $resulttt = $connection->query($sql_site);
+
+                    while ($rowww = $resulttt->fetch_assoc()) {
+                        $site =   $rowww["name"];
+                    }
+                    if ($site == "Vatan")
+                        $site_img = "vatan.png";
+                    else if ($site == "Trendyol")
+                        $site_img = "trendyol.png";
+                    else if ($site == "N11")
+                        $site_img = "n11.png";
+                    else  $site_img = "teknosa.png";
+                    echo
+                    "<tr>
+                    <td> <img src= \"" . $img_url . "\" alt=\"image_url\" width=\"150 \"> </td>
+                    <td>  <a href=\"urun_ozellikleri.php?model_id=$modelid&urun_title=$urun_title\" style=\"color: black;\">" . $urun_title . " </a>    </td>
+                    <td style=\"background-color: darkslateblue;\" > <a href=\"" . $urun_url . "\"> <img src=\"" . $site_img . "\" alt=\"" . $site . "\" width=\"50px\"> </a> </td>
+                 
+
+                </tr>";
+                }
+            }
+
+
+            /*
+            $sql_marka = "SELECT name FROM marka WHERE id = (SELECT marka_id FROM model WHERE id = $modelid)
+            ";
+            $resultt = $connection->query($sql_marka);
+
+            while ($roww = $resultt->fetch_assoc()) {
+            echo " marka = " . $roww["name"];
+            }*/
+
+
+            ?>
+
+
+
+        </tbody>
+    </table>
+
+
+
+    <section>
+        <form action="filtrelenmis.php" method="POST">
+            <?php
+            session_start();
+            $array_ram = array();
+            $array_marka = array();
+            $array_isletim_sistemi = array();
+            $array_ssd = array();
+            $array_hdd = array();
+            $array_ekran = array();
+            $array_puan = array();
+            $array_site = array();
+            $array_islemci_tipi = array();
+            $array_islemci_nesli = array();
+
+            $servername = "localhost";
+            $username = "root";
+            $password = "Mysql123";
+            $database = "pcdb1";
+            $connection = new mysqli($servername, $username, $password, $database);
+            if ($connection->connect_error) {
+                die("connection Failed" . $connection->connect_error);
+            }
+
+            $sql = "SELECT count(*) as sayi FROM ram ";
+            $result = $connection->query($sql);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                $ram_adet = $row["sayi"];
+            }
+            $_SESSION['ram_adet'] = $ram_adet;
+            ?>
+
+            <div>
+                <h3> RAM</h3>
+                <?php
+                for ($i = 1; $i <= $ram_adet; $i++) {
+                    $sql = "SELECT name FROM ram where id=$i ";
+                    $result = $connection->query($sql);
+                    if (!$result) {
+                        die("Invalid Query : " . $connection->error);
+                    }
+
+
+
+                    while ($row = $result->fetch_assoc()) {
+                        $ram_name = $row["name"];
+                        $array_ram[($i - 1)] = $ram_name;
+
+                        echo   "<label> <input type=\"checkbox\" name=\"r" . $ram_name . "\">" . $ram_name . " </label> <br>";
+                    }
+                }
+                $_SESSION['array_ram'] = $array_ram;
+                ?>
+            </div>
+            <?php
+            $sql = "SELECT count(*) as sayi FROM marka ";
+            $result = $connection->query($sql);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                $marka_adet = $row["sayi"];
+            }
+
+            $_SESSION['marka_adet'] = $marka_adet;
+            ?>
+
+            <div>
+                <h3> MARKA</h3>
+                <?php
+                for ($i = 1; $i <= $marka_adet; $i++) {
+                    $sql = "SELECT name FROM marka where id=$i ";
+                    $result = $connection->query($sql);
+                    if (!$result) {
+                        die("Invalid Query : " . $connection->error);
+                    }
+
+
+
+                    while ($row = $result->fetch_assoc()) {
+                        $marka_name = $row["name"];
+                        $array_marka[($i - 1)] = $marka_name;
+
+
+                        echo   "<label> <input type=\"checkbox\" name=\"" . $marka_name . "\">" . $marka_name . " </label> <br>";
+                    }
+                }
+
+                $_SESSION['array_marka'] = $array_marka;
+                ?>
+            </div>
+
+
+            <?php
+            $sql = "SELECT count(*) as sayi FROM isletim_sistemi ";
+            $result = $connection->query($sql);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                $isletim_sistemi_adet = $row["sayi"];
+            }
+
+            $_SESSION['isletim_sistemi_adet'] = $isletim_sistemi_adet;
+            ?>
+
+            <div>
+                <h3> İŞLETİM SİSTEMİ</h3>
+                <?php
+                for ($i = 1; $i <= $isletim_sistemi_adet; $i++) {
+                    $sql = "SELECT name FROM isletim_sistemi where id=$i ";
+                    $result = $connection->query($sql);
+                    if (!$result) {
+                        die("Invalid Query : " . $connection->error);
+                    }
+
+
+
+                    while ($row = $result->fetch_assoc()) {
+                        $isletim_sistemi_name = $row["name"];
+                        $array_isletim_sistemi[($i - 1)] = $isletim_sistemi_name;
+
+                        echo   "<label> <input type=\"checkbox\" name=\"" . $isletim_sistemi_name . "\">" . $isletim_sistemi_name . " </label> <br>";
+                    }
+                }
+                $_SESSION['array_isletim_sistemi'] = $array_isletim_sistemi;
+                ?>
+            </div>
+
+
+            <?php
+            $sql = "SELECT count(*) as sayi FROM ssd ";
+            $result = $connection->query($sql);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                $ssd_adet = $row["sayi"];
+            }
+            $_SESSION['ssd_adet'] = $ssd_adet;
+            ?>
+
+            <div>
+                <h3> SSD</h3>
+                <?php
+                for ($i = 1; $i <= $ssd_adet; $i++) {
+                    $sql = "SELECT name FROM ssd where id=$i ";
+                    $result = $connection->query($sql);
+                    if (!$result) {
+                        die("Invalid Query : " . $connection->error);
+                    }
+
+
+
+                    while ($row = $result->fetch_assoc()) {
+                        $ssd_name = $row["name"];
+                        $array_ssd[($i - 1)] = $ssd_name;
+
+
+                        echo   "<label> <input type=\"checkbox\" name=\"s" . $ssd_name . "\">" . $ssd_name . " </label> <br>";
+                    }
+                }
+                $_SESSION['array_ssd'] = $array_ssd;
+                ?>
+            </div>
+
+
+
+            <?php
+            $sql = "SELECT count(*) as sayi FROM hdd ";
+            $result = $connection->query($sql);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                $hdd_adet = $row["sayi"];
+            }
+            $_SESSION['hdd_adet'] = $hdd_adet;
+            ?>
+
+            <div>
+                <h3> HDD</h3>
+                <?php
+                for ($i = 1; $i <= $hdd_adet; $i++) {
+                    $sql = "SELECT name FROM hdd where id=$i ";
+                    $result = $connection->query($sql);
+                    if (!$result) {
+                        die("Invalid Query : " . $connection->error);
+                    }
+
+
+
+                    while ($row = $result->fetch_assoc()) {
+                        $hdd_name = $row["name"];
+                        $array_hdd[($i - 1)] = $hdd_name;
+
+                        echo   "<label> <input type=\"checkbox\" name=\"h" . $hdd_name . "\">" . $hdd_name . " </label> <br>";
+                    }
+                }
+                $_SESSION['array_hdd'] = $array_hdd;
+                ?>
+            </div>
+
+            <?php
+            $sql = "SELECT count(*) as sayi FROM ekran ";
+            $result = $connection->query($sql);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                $ekran_adet = $row["sayi"];
+            }
+            $_SESSION['ekran_adet'] = $ekran_adet;
+            ?>
+
+            <div>
+                <h3> EKRAN BOYUTU</h3>
+                <?php
+                for ($i = 1; $i <= $ekran_adet; $i++) {
+                    $sql = "SELECT name FROM ekran where id=$i ";
+                    $result = $connection->query($sql);
+                    if (!$result) {
+                        die("Invalid Query : " . $connection->error);
+                    }
+
+
+
+                    while ($row = $result->fetch_assoc()) {
+                        $ekran_name = $row["name"];
+                        $array_ekran[($i - 1)] = $ekran_name;
+
+                        echo   "<label> <input type=\"checkbox\" name=\"e" . $ekran_name . "\">" . $ekran_name . " </label> <br>";
+                    }
+                }
+                $_SESSION['array_ekran'] = $array_ekran;
+                ?>
+            </div>
+
+            <?php
+            $sql = "SELECT count(*) as sayi FROM puan ";
+            $result = $connection->query($sql);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                $puan_adet = $row["sayi"];
+            }
+            $_SESSION['puan_adet'] = $puan_adet;
+            ?>
+
+            <div>
+                <h3> PUAN</h3>
+                <?php
+                for ($i = 1; $i <= $puan_adet; $i++) {
+                    $sql = "SELECT name FROM puan where id=$i ";
+                    $result = $connection->query($sql);
+                    if (!$result) {
+                        die("Invalid Query : " . $connection->error);
+                    }
+
+
+
+                    while ($row = $result->fetch_assoc()) {
+                        $puan_name = $row["name"];
+                        $array_puan[($i - 1)] = $puan_name;
+
+                        echo   "<label> <input type=\"checkbox\" name=\"p" . $puan_name . "\">" . $puan_name . " </label> <br>";
+                    }
+                }
+
+                $_SESSION['array_puan'] = $array_puan;
+                ?>
+            </div>
+
+
+
+            <?php
+            $sql = "SELECT count(*) as sayi FROM site ";
+            $result = $connection->query($sql);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                $site_adet = $row["sayi"];
+            }
+            $_SESSION['site_adet'] = $site_adet;
+            ?>
+
+            <div>
+                <h3> Site</h3>
+                <?php
+                for ($i = 1; $i <= $site_adet; $i++) {
+                    $sql = "SELECT name FROM site where id=$i ";
+                    $result = $connection->query($sql);
+                    if (!$result) {
+                        die("Invalid Query : " . $connection->error);
+                    }
+
+
+
+                    while ($row = $result->fetch_assoc()) {
+                        $site_name = $row["name"];
+                        $array_site[($i - 1)] = $site_name;
+
+                        echo   "<label> <input type=\"checkbox\" name=\"" . $site_name . "\">" . $site_name . " </label> <br>";
+                    }
+                }
+                $_SESSION['array_site'] = $array_site;
+                ?>
+            </div>
+
+
+            <?php
+            $sql = "SELECT count(*) as sayi FROM islemci_tipi ";
+            $result = $connection->query($sql);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                $islemci_tipi_adet = $row["sayi"];
+            }
+            $_SESSION['islemci_tipi_adet'] = $islemci_tipi_adet;
+            ?>
+
+            <div>
+                <h3> İŞLEMCİ </h3>
+                <?php
+                for ($i = 1; $i <= $islemci_tipi_adet; $i++) {
+                    $sql = "SELECT name FROM islemci_tipi where id=$i ";
+                    $result = $connection->query($sql);
+                    if (!$result) {
+                        die("Invalid Query : " . $connection->error);
+                    }
+
+
+
+                    while ($row = $result->fetch_assoc()) {
+                        $islemci_tipi_name = $row["name"];
+                        $array_islemci_tipi[($i - 1)] = $islemci_tipi_name;
+
+                        echo   "<label> <input type=\"checkbox\" name=\"t" . $islemci_tipi_name . "\">" . $islemci_tipi_name . " </label> <br>";
+                    }
+                }
+                $_SESSION['array_islemci_tipi'] = $array_islemci_tipi;
+                ?>
+            </div>
+
+
+
+            <?php
+            $sql = "SELECT count(*) as sayi FROM islemci_nesli ";
+            $result = $connection->query($sql);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                $islemci_nesli_adet = $row["sayi"];
+            }
+            $_SESSION['islemci_nesli_adet'] = $islemci_nesli_adet;
+            ?>
+
+            <div>
+                <h3> İŞLEMCİ NESLİ </h3>
+                <?php
+                for ($i = 1; $i <= $islemci_nesli_adet; $i++) {
+                    $sql = "SELECT name FROM islemci_nesli where id=$i ";
+                    $result = $connection->query($sql);
+                    if (!$result) {
+                        die("Invalid Query : " . $connection->error);
+                    }
+
+
+
+                    while ($row = $result->fetch_assoc()) {
+                        $islemci_nesli_name = $row["name"];
+                        $array_islemci_nesli[($i - 1)] = $islemci_nesli_name;
+
+                        echo   "<label> <input type=\"checkbox\" name=\"n" . $islemci_nesli_name . "\">" . $islemci_nesli_name . " </label> <br>";
+                    }
+                }
+                $_SESSION['array_islemci_nesli'] = $array_islemci_nesli;
+                ?>
+            </div>
+
+
+
+
+            <div>
+                <h3> FİYAT </h3>
+                <?php
+
+
+                echo   "<label> <input type=\"text\" name=\"min\" placeholder=\". ile yazınız(min)\">min </label> <br>
+        
+        <label> <input type=\"text\" name=\"max\"  placeholder=\" . ile yazınız(max)\">max </label> <br>";
+
+
+                ?>
+            </div>
+            <?php
+
+            if (!empty($_POST["min"])) {
+                $min_fiyat = $_POST["min"];
+            } else $min_fiyat = "0";
+            if (!empty($_POST["max"])) {
+                $max_fiyat = $_POST["max"];
+            } else $max_fiyat = "200.000";
+
+
+
+
+
+
+
+
+            $ram_ids = array();
+            for ($j = 0; $j < $ram_adet; $j++) {
+                if ($_POST["r" . $array_ram[$j]] == "on") {
+                    array_push($ram_ids, ($j + 1));
+                }
+            }
+            $sorgu_ram = "in(";
+            if (!empty($ram_ids)) {
+                for ($k = 0; $k < sizeof($ram_ids); $k++) {
+
+
+                    if ($k == (sizeof($ram_ids) - 1) || sizeof($ram_ids) == 1) {
+                        $sorgu_ram .= $ram_ids[$k] . ")";
+                    } else
+                        $sorgu_ram .= $ram_ids[$k] . ",";
+                }
+            } else $sorgu_ram = ""; //tüm ramları getirtmem lazım
+
+
+            $marka_ids = array();
+            for ($j = 0; $j < $marka_adet; $j++) {
+                if ($_POST["" . $array_marka[$j]] == "on") {
+                    array_push($marka_ids, ($j + 1));
+                }
+            }
+            $sorgu_marka = "in(";
+            if (!empty($marka_ids)) {
+                for ($k = 0; $k < sizeof($marka_ids); $k++) {
+
+
+                    if ($k == (sizeof($marka_ids) - 1) || sizeof($marka_ids) == 1) {
+                        $sorgu_marka .= $marka_ids[$k] . ")";
+                    } else
+                        $sorgu_marka .= $marka_ids[$k] . ",";
+                }
+            } else $sorgu_marka = "";
+
+
+            $isletim_sistemi_ids = array();
+            for ($j = 0; $j < $isletim_sistemi_adet; $j++) {
+                if ($_POST["" . $array_isletim_sistemi[$j]] == "on") {
+                    array_push($isletim_sistemi_ids, ($j + 1));
+                }
+            }
+            $sorgu_isletim_sistemi = "in(";
+            if (!empty($isletim_sistemi_ids)) {
+                for ($k = 0; $k < sizeof($isletim_sistemi_ids); $k++) {
+
+
+                    if ($k == (sizeof($isletim_sistemi_ids) - 1) || sizeof($isletim_sistemi_ids) == 1) {
+                        $sorgu_isletim_sistemi .= $isletim_sistemi_ids[$k] . ")";
+                    } else
+                        $sorgu_isletim_sistemi .= $isletim_sistemi_ids[$k] . ",";
+                }
+            } else $sorgu_isletim_sistemi = "";
+
+
+
+            $ssd_ids = array();
+            for ($j = 0; $j < $ssd_adet; $j++) {
+                if ($_POST["s" . $array_ssd[$j]] == "on") {
+                    array_push($ssd_ids, ($j + 1));
+                }
+            }
+            $sorgu_ssd = "in(";
+            if (!empty($ssd_ids)) {
+                for ($k = 0; $k < sizeof($ssd_ids); $k++) {
+
+
+                    if ($k == (sizeof($ssd_ids) - 1) || sizeof($ssd_ids) == 1) {
+                        $sorgu_ssd .= $ssd_ids[$k] . ")";
+                    } else
+                        $sorgu_ssd .= $ssd_ids[$k] . ",";
+                }
+            } else $sorgu_ssd = "";
+
+
+            $hdd_ids = array();
+            for ($j = 0; $j < $hdd_adet; $j++) {
+                if ($_POST["h" . $array_hdd[$j]] == "on") {
+                    array_push($hdd_ids, ($j + 1));
+                }
+            }
+            $sorgu_hdd = "in(";
+            if (!empty($hdd_ids)) {
+                for ($k = 0; $k < sizeof($hdd_ids); $k++) {
+
+
+                    if ($k == (sizeof($hdd_ids) - 1) || sizeof($hdd_ids) == 1) {
+                        $sorgu_hdd .= $hdd_ids[$k] . ")";
+                    } else
+                        $sorgu_hdd .= $hdd_ids[$k] . ",";
+                }
+            } else $sorgu_hdd = "";
+
+
+
+
+            $ekran_ids = array();
+            for ($j = 0; $j < $ekran_adet; $j++) {
+                if ($_POST["e" . $array_ekran[$j]] == "on") {
+                    array_push($ekran_ids, ($j + 1));
+                }
+            }
+            $sorgu_ekran = "in(";
+            if (!empty($ekran_ids)) {
+                for ($k = 0; $k < sizeof($ekran_ids); $k++) {
+
+
+                    if ($k == (sizeof($ekran_ids) - 1) || sizeof($ekran_ids) == 1) {
+                        $sorgu_ekran .= $ekran_ids[$k] . ")";
+                    } else
+                        $sorgu_ekran .= $ekran_ids[$k] . ",";
+                }
+            } else $sorgu_ekran = "";
+
+
+
+            $puan_ids = array();
+            for ($j = 0; $j < $puan_adet; $j++) {
+                if ($_POST["p" . $array_puan[$j]] == "on") {
+                    array_push($puan_ids, ($j + 1));
+                }
+            }
+            $sorgu_puan = "in(";
+            if (!empty($puan_ids)) {
+                for ($k = 0; $k < sizeof($puan_ids); $k++) {
+
+
+                    if ($k == (sizeof($puan_ids) - 1) || sizeof($puan_ids) == 1) {
+                        $sorgu_puan .= $puan_ids[$k] . ")";
+                    } else
+                        $sorgu_puan .= $puan_ids[$k] . ",";
+                }
+            } else $sorgu_puan = "";
+
+
+            $site_ids = array();
+            for ($j = 0; $j < $site_adet; $j++) {
+                if ($_POST["" . $array_site[$j]] == "on") {
+                    array_push($site_ids, ($j + 1));
+                }
+            }
+            $sorgu_site = "in(";
+            if (!empty($site_ids)) {
+                for ($k = 0; $k < sizeof($site_ids); $k++) {
+
+
+                    if ($k == (sizeof($site_ids) - 1) || sizeof($site_ids) == 1) {
+                        $sorgu_site .= $site_ids[$k] . ")";
+                    } else
+                        $sorgu_site .= $site_ids[$k] . ",";
+                }
+            } else $sorgu_site = "";
+
+
+
+            $islemci_tipi_ids = array();
+            for ($j = 0; $j < $islemci_tipi_adet; $j++) {
+                if ($_POST["t" . $array_islemci_tipi[$j]] == "on") {
+                    array_push($islemci_tipi_ids, ($j + 1));
+                }
+            }
+            $sorgu_islemci_tipi = "in(";
+            if (!empty($islemci_tipi_ids)) {
+                for ($k = 0; $k < sizeof($islemci_tipi_ids); $k++) {
+
+
+                    if ($k == (sizeof($islemci_tipi_ids) - 1) || sizeof($islemci_tipi_ids) == 1) {
+                        $sorgu_islemci_tipi .= $islemci_tipi_ids[$k] . ")";
+                    } else
+                        $sorgu_islemci_tipi .= $islemci_tipi_ids[$k] . ",";
+                }
+            } else $sorgu_islemci_tipi = "";
+
+
+
+            $islemci_nesli_ids = array();
+            for ($j = 0; $j < $islemci_nesli_adet; $j++) {
+                if ($_POST["n" . $array_islemci_nesli[$j]] == "on") {
+                    array_push($islemci_nesli_ids, ($j + 1));
+                }
+            }
+            $sorgu_islemci_nesli = "in(";
+            if (!empty($islemci_nesli_ids)) {
+                for ($k = 0; $k < sizeof($islemci_nesli_ids); $k++) {
+
+
+                    if ($k == (sizeof($islemci_nesli_ids) - 1) || sizeof($islemci_nesli_ids) == 1) {
+                        $sorgu_islemci_nesli .= $islemci_nesli_ids[$k] . ")";
+                    } else
+                        $sorgu_islemci_nesli .= $islemci_nesli_ids[$k] . ",";
+                }
+            } else $sorgu_islemci_nesli = "";
+
+            $sql_filtre_site = "SELECT model_id as id From model_site where site_id " . $sorgu_site . "";
+            $sorgu_sitee = array();
+            $result = $connection->query($sql_filtre_site);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                array_push($sorgu_sitee, $row["id"]);
+            }
+
+            $sorgu_site_model = "in(";
+            if (!empty($sorgu_sitee)) {
+                for ($k = 0; $k < sizeof($sorgu_sitee); $k++) {
+
+
+                    if ($k == (sizeof($sorgu_sitee) - 1) || sizeof($sorgu_sitee) == 1) {
+                        $sorgu_site_model .= $sorgu_sitee[$k] . ")";
+                    } else
+                        $sorgu_site_model .= $sorgu_sitee[$k] . ",";
+                }
+            } else $sorgu_site_model = "";
+
+
+
+
+            $sql_filtre = "SELECT id FROM model where ram_id " . $sorgu_ram . " and marka_id " . $sorgu_marka . " and isletim_sistemi_id " . $sorgu_isletim_sistemi . " and ssd_id " . $sorgu_ssd . " and hdd_id " . $sorgu_hdd . " and ekran_id " . $sorgu_ekran . " and puan_id " . $sorgu_puan . " and islemci_tipi_id " . $sorgu_islemci_tipi . " and islemci_nesli_id " . $sorgu_islemci_nesli . " and fiyat>" . $min_fiyat . " and fiyat<" . $max_fiyat . " and id " . $sorgu_site_model . " ";
+            $_SESSION['sql_filtre'] = $sql_filtre;
+            // echo $_SESSION['sql_filtre'];
+            /*$result = $connection->query($sql_filtre);
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+                if (!empty($row))
+                    echo $row["id"];
+                else
+                    echo " sql boş";
+            }
+*/
+
+
+            ?>
+
+            <br>
+            <br>
+            <br>
+
+            <input id="filtrele" type="submit" value="Filtrele" name="submit">
+
+        </form>
+    </section>
+
+
+
+
+
+
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FİLTRELENMİŞ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <style>
+        thead {
+            background-color: darkgray;
+        }
+
+        h1 {
+            background-color: lightblue;
+        }
+
+        .table {
+            position: absolute;
+            margin-left: 0%;
+            width: 100%;
+            background-color: violet;
+
+        }
+
+        iframe {
+            position: absolute;
+            height: 100%;
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <?php
+    $servername = "localhost";
+    $username = "root";
+    $password = "Mysql123";
+    $database = "pcdb1";
+    $connection = new mysqli($servername, $username, $password, $database);
+    if ($connection->connect_error) {
+        die("connection Failed" . $connection->connect_error);
+    }
+    session_start();
+    $ram_adet = $_SESSION['ram_adet'];
+
+    $array_ram = $_SESSION['array_ram'];
+    $marka_adet = $_SESSION['marka_adet'];
+    $array_marka = $_SESSION['array_marka'];
+
+    $isletim_sistemi_adet = $_SESSION['isletim_sistemi_adet'];
+    $array_isletim_sistemi = $_SESSION['array_isletim_sistemi'];
+    $ssd_adet = $_SESSION['ssd_adet'];
+    $array_ssd = $_SESSION['array_ssd'];
+    $hdd_adet =  $_SESSION['hdd_adet'];
+    $array_hdd = $_SESSION['array_hdd'];
+    $ekran_adet = $_SESSION['ekran_adet'];
+    $array_ekran = $_SESSION['array_ekran'];
+    $puan_adet = $_SESSION['puan_adet'];
+    $array_puan = $_SESSION['array_puan'];
+    $site_adet = $_SESSION['site_adet'];
+    $array_site = $_SESSION['array_site'];
+
+
+    $islemci_tipi_adet = $_SESSION['islemci_tipi_adet'];
+    $array_islemci_tipi = $_SESSION['array_islemci_tipi'];
+    $islemci_nesli_adet = $_SESSION['islemci_nesli_adet'];
+    $array_islemci_nesli = $_SESSION['array_islemci_nesli'];
+
+    if (!empty($_POST["min"])) {
+        $min_fiyat = $_POST["min"];
+    } else $min_fiyat = "0";
+    if (!empty($_POST["max"])) {
+        $max_fiyat = $_POST["max"];
+    } else $max_fiyat = "200.000";
+
+
+
+
+
+    $ram_ids = array();
+    for ($j = 0; $j < $ram_adet; $j++) {
+        if ($_POST["r" . $array_ram[$j]] == "on") {
+            array_push($ram_ids, ($j + 1));
+        }
+    }
+    $sorgu_ram = "in(";
+    if (!empty($ram_ids)) {
+        for ($k = 0; $k < sizeof($ram_ids); $k++) {
+
+
+            if ($k == (sizeof($ram_ids) - 1) || sizeof($ram_ids) == 1) {
+                $sorgu_ram .= $ram_ids[$k] . ")";
+            } else
+                $sorgu_ram .= $ram_ids[$k] . ",";
+        }
+    } else $sorgu_ram = ""; //tüm ramları getirtmem lazım
+
+
+    $marka_ids = array();
+    for ($j = 0; $j < $marka_adet; $j++) {
+        if ($_POST["" . $array_marka[$j]] == "on") {
+            array_push($marka_ids, ($j + 1));
+        }
+    }
+    $sorgu_marka = "in(";
+    if (!empty($marka_ids)) {
+        for ($k = 0; $k < sizeof($marka_ids); $k++) {
+
+
+            if ($k == (sizeof($marka_ids) - 1) || sizeof($marka_ids) == 1) {
+                $sorgu_marka .= $marka_ids[$k] . ")";
+            } else
+                $sorgu_marka .= $marka_ids[$k] . ",";
+        }
+    } else $sorgu_marka = "";
+
+
+    $isletim_sistemi_ids = array();
+    for ($j = 0; $j < $isletim_sistemi_adet; $j++) {
+        if ($_POST["" . $array_isletim_sistemi[$j]] == "on") {
+            array_push($isletim_sistemi_ids, ($j + 1));
+        }
+    }
+    $sorgu_isletim_sistemi = "in(";
+    if (!empty($isletim_sistemi_ids)) {
+        for ($k = 0; $k < sizeof($isletim_sistemi_ids); $k++) {
+
+
+            if ($k == (sizeof($isletim_sistemi_ids) - 1) || sizeof($isletim_sistemi_ids) == 1) {
+                $sorgu_isletim_sistemi .= $isletim_sistemi_ids[$k] . ")";
+            } else
+                $sorgu_isletim_sistemi .= $isletim_sistemi_ids[$k] . ",";
+        }
+    } else $sorgu_isletim_sistemi = "";
+
+
+
+
+    $ssd_ids = array();
+    for ($j = 0; $j < $ssd_adet; $j++) {
+        if ($_POST["s" . $array_ssd[$j]] == "on") {
+            array_push($ssd_ids, ($j + 1));
+        }
+    }
+    $sorgu_ssd = "in(";
+    if (!empty($ssd_ids)) {
+        for ($k = 0; $k < sizeof($ssd_ids); $k++) {
+
+
+            if ($k == (sizeof($ssd_ids) - 1) || sizeof($ssd_ids) == 1) {
+                $sorgu_ssd .= $ssd_ids[$k] . ")";
+            } else
+                $sorgu_ssd .= $ssd_ids[$k] . ",";
+        }
+    } else $sorgu_ssd = "";
+
+
+    $hdd_ids = array();
+    for ($j = 0; $j < $hdd_adet; $j++) {
+        if ($_POST["h" . $array_hdd[$j]] == "on") {
+            array_push($hdd_ids, ($j + 1));
+        }
+    }
+    $sorgu_hdd = "in(";
+    if (!empty($hdd_ids)) {
+        for ($k = 0; $k < sizeof($hdd_ids); $k++) {
+
+
+            if ($k == (sizeof($hdd_ids) - 1) || sizeof($hdd_ids) == 1) {
+                $sorgu_hdd .= $hdd_ids[$k] . ")";
+            } else
+                $sorgu_hdd .= $hdd_ids[$k] . ",";
+        }
+    } else $sorgu_hdd = "";
+
+
+
+
+    $ekran_ids = array();
+    for ($j = 0; $j < $ekran_adet; $j++) {
+        if ($_POST["e" . $array_ekran[$j]] == "on") {
+            array_push($ekran_ids, ($j + 1));
+        }
+    }
+    $sorgu_ekran = "in(";
+    if (!empty($ekran_ids)) {
+        for ($k = 0; $k < sizeof($ekran_ids); $k++) {
+
+
+            if ($k == (sizeof($ekran_ids) - 1) || sizeof($ekran_ids) == 1) {
+                $sorgu_ekran .= $ekran_ids[$k] . ")";
+            } else
+                $sorgu_ekran .= $ekran_ids[$k] . ",";
+        }
+    } else $sorgu_ekran = "";
+
+
+
+    $puan_ids = array();
+    for ($j = 0; $j < $puan_adet; $j++) {
+        if ($_POST["p" . $array_puan[$j]] == "on") {
+            array_push($puan_ids, ($j + 1));
+        }
+    }
+    $sorgu_puan = "in(";
+    if (!empty($puan_ids)) {
+        for ($k = 0; $k < sizeof($puan_ids); $k++) {
+
+
+            if ($k == (sizeof($puan_ids) - 1) || sizeof($puan_ids) == 1) {
+                $sorgu_puan .= $puan_ids[$k] . ")";
+            } else
+                $sorgu_puan .= $puan_ids[$k] . ",";
+        }
+    } else $sorgu_puan = "";
+
+
+    $site_ids = array();
+    for ($j = 0; $j < $site_adet; $j++) {
+        if ($_POST["" . $array_site[$j]] == "on") {
+            array_push($site_ids, ($j + 1));
+        }
+    }
+    $sorgu_site = "in(";
+    if (!empty($site_ids)) {
+        for ($k = 0; $k < sizeof($site_ids); $k++) {
+
+
+            if ($k == (sizeof($site_ids) - 1) || sizeof($site_ids) == 1) {
+                $sorgu_site .= $site_ids[$k] . ")";
+            } else
+                $sorgu_site .= $site_ids[$k] . ",";
+        }
+    } else $sorgu_site = "";
+
+
+
+
+    $islemci_tipi_ids = array();
+    for ($j = 0; $j < $islemci_tipi_adet; $j++) {
+        if ($_POST["t" . $array_islemci_tipi[$j]] == "on") {
+            array_push($islemci_tipi_ids, ($j + 1));
+        }
+    }
+    $sorgu_islemci_tipi = "in(";
+    if (!empty($islemci_tipi_ids)) {
+        for ($k = 0; $k < sizeof($islemci_tipi_ids); $k++) {
+
+
+            if ($k == (sizeof($islemci_tipi_ids) - 1) || sizeof($islemci_tipi_ids) == 1) {
+                $sorgu_islemci_tipi .= $islemci_tipi_ids[$k] . ")";
+            } else
+                $sorgu_islemci_tipi .= $islemci_tipi_ids[$k] . ",";
+        }
+    } else $sorgu_islemci_tipi = "";
+
+
+    $islemci_nesli_ids = array();
+    for ($j = 0; $j < $islemci_nesli_adet; $j++) {
+        if ($_POST["n" . $array_islemci_nesli[$j]] == "on") {
+            array_push($islemci_nesli_ids, ($j + 1));
+        }
+    }
+    $sorgu_islemci_nesli = "in(";
+    if (!empty($islemci_nesli_ids)) {
+        for ($k = 0; $k < sizeof($islemci_nesli_ids); $k++) {
+
+
+            if ($k == (sizeof($islemci_nesli_ids) - 1) || sizeof($islemci_nesli_ids) == 1) {
+                $sorgu_islemci_nesli .= $islemci_nesli_ids[$k] . ")";
+            } else
+                $sorgu_islemci_nesli .= $islemci_nesli_ids[$k] . ",";
+        }
+    } else $sorgu_islemci_nesli = "";
+
+
+    $sql_filtre_site = "SELECT model_id as id From model_site where site_id " . $sorgu_site . "";
+    $sorgu_sitee = array();
+    $result = $connection->query($sql_filtre_site);
+    if (!$result) {
+        die("Invalid Query : " . $connection->error);
+    }
+
+
+    while ($row = $result->fetch_assoc()) {
+        array_push($sorgu_sitee, $row["id"]);
+    }
+
+    $sorgu_site_model = "in(";
+    if (!empty($sorgu_sitee)) {
+        for ($k = 0; $k < sizeof($sorgu_sitee); $k++) {
+
+
+            if ($k == (sizeof($sorgu_sitee) - 1) || sizeof($sorgu_sitee) == 1) {
+                $sorgu_site_model .= $sorgu_sitee[$k] . ")";
+            } else
+                $sorgu_site_model .= $sorgu_sitee[$k] . ",";
+        }
+    } else $sorgu_site_model = "";
+
+
+
+    $sql_filtre = "SELECT id FROM model where ram_id " . $sorgu_ram . " and marka_id " . $sorgu_marka . " and isletim_sistemi_id " . $sorgu_isletim_sistemi . " and ssd_id " . $sorgu_ssd . " and hdd_id " . $sorgu_hdd . " and ekran_id " . $sorgu_ekran . " and puan_id " . $sorgu_puan . " and islemci_tipi_id " . $sorgu_islemci_tipi . " and islemci_nesli_id " . $sorgu_islemci_nesli . " and fiyat>" . $min_fiyat . " and fiyat<" . $max_fiyat . " and id " . $sorgu_site_model . " ";
+    $_SESSION['sql_filtre'] = $sql_filtre;
+    /* echo $_SESSION['sql_filtre'];
+    $result = $connection->query($sql_filtre);
+    if (!$result) {
+        die("Invalid Query : " . $connection->error);
+    }
+
+
+    while ($row = $result->fetch_assoc()) {
+        if (!empty($row))
+            echo $row["id"];
+        else
+            echo " sql boş";
+    }
+
+*/
+
+
+
+
+
+
+
+    ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h1 style="text-align: center;"> Filtrelenmiş Ürün Listesi </h1>
+
+    <?php session_start();
+    $sql_filtrelenmis = $_SESSION['sql_filtre']; ?>
+    <table class="table" border="1">
+        <thead style="text-align: center; ">
+            <tr>
+                <th>Resim</th>
+                <th>Ürün Başlığı</th>
+                <th>Site</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+
+
+            $siralama = $_SESSION['siralama'];
+            // echo $siralama;
+            $sql = $_SESSION['sql_filtre'] . $siralama;
+            //  echo $sql;
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+
+            while ($row = $result->fetch_assoc()) {
+
+                $modelid = $row["id"];
+                $sorgu  = "SELECT * FROM model where id =" . $modelid;
+                $resultt = $connection->query($sorgu);
+
+
+                if (!$resultt) {
+                    die("Invalid Query : " . $connection->error);
+                }
+                while ($roww = $resultt->fetch_assoc()) {
+
+                    $img_url = $roww["image_url"];
+                    $urun_url = $roww["urun_url"];
+                    $urun_title = $roww["urun_title"];
+                    $sql_site = "SELECT name FROM site WHERE id= (SELECT site_id FROM model_site WHERE model_id = ($modelid))";
+                    $resulttt = $connection->query($sql_site);
+
+                    while ($rowww = $resulttt->fetch_assoc()) {
+                        $site =   $rowww["name"];
+                    }
+                    if ($site == "Vatan")
+                        $site_img = "vatan.png";
+                    else if ($site == "Trendyol")
+                        $site_img = "trendyol.png";
+                    else if ($site == "N11")
+                        $site_img = "n11.png";
+                    else  $site_img = "teknosa.png";
+                    echo
+                    "<tr>
+                    <td> <img src= \"" . $img_url . "\" alt=\"image_url\" width=\"150 \"> </td>
+                    <td>  <a href=\"urun_ozellikleri.php?model_id=$modelid&urun_title=$urun_title\" target=\"_blank\" style=\"color: black;\">" . $urun_title .  " </a>    </td>
+                    <td style=\"background-color: darkslateblue;\"> <a href=\"" . $urun_url . "\"> <img src=\"" . $site_img . "\" alt=\"" . $site . "\" width=\"50px\"> </a> </td>
+                 
+
+                </tr>";
+                }
+            }
+
+            ?>
+
+
+
+        </tbody>
+    </table>
+
+
+
+
+</body>
+
+</html>
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ürün Özelliği</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        h1 {
+            background-color: aqua;
+        }
+
+        h2 {
+
+            background-color: chartreuse;
+        }
+
+        table {
+            background-color: darkgray;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 style="text-align: center;">Ürün Özellikleri </h1>
+    <hr>
+    <table class="table" border="1">
+        <thead style="text-align: center;">
+            <tr>
+                <th>Marka</th>
+                <th>Model</th>
+                <th>Fiyat</th>
+                <th>İşletim Sistemi</th>
+                <th>İşlemci Tipi</th>
+                <th>İşlemci Nesli</th>
+                <th>SSD</th>
+                <th>HDD</th>
+                <th>Ram</th>
+                <th>Ekran Boyutu</th>
+                <th>Puan</th>
+            </tr>
+
+        </thead>
+        <tbody style="text-align:center ;">
+            <?php
+            $servername = "localhost";
+            $username = "root";
+            $password = "Mysql123";
+            $database = "pcdb1";
+            $connection = new mysqli($servername, $username, $password, $database);
+            if ($connection->connect_error) {
+                die("connection Failed" . $connection->connect_error);
+            }
+
+
+            $model_id = htmlspecialchars($_GET['model_id']);
+            $urun_title = htmlspecialchars($_GET['urun_title']);
+            echo "<h2 style=\"text-align: center; \" >" . $urun_title . "</h2>";
+            $sql = "SELECT * FROM model WHERE id=$model_id";
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+
+            while ($row = $result->fetch_assoc()) {
+                $marka_id = $row["marka_id"];
+                $model_name = $row["name"];
+                $fiyat = $row["fiyat"];
+                $isletim_sistemi_id = $row["isletim_sistemi_id"];
+                $islemci_tipi_id = $row["islemci_tipi_id"];
+                $islemci_nesli_id = $row["islemci_nesli_id"];
+                $ssd_id = $row["ssd_id"];
+                $hdd_id = $row["hdd_id"];
+                $ram_id = $row["ram_id"];
+                $ekran_id = $row["ekran_id"];
+                $puan_id = $row["puan_id"];
+            }
+            $sql = "SELECT name FROM marka WHERE id=$marka_id";
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+            while ($row = $result->fetch_assoc()) {
+
+                $marka = $row["name"];
+            }
+            $sql = "SELECT name FROM isletim_sistemi WHERE id=$isletim_sistemi_id";
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+            while ($row = $result->fetch_assoc()) {
+
+                $isletim_sistemi = $row["name"];
+            }
+            $sql = "SELECT name FROM islemci_tipi  WHERE id=$islemci_tipi_id";
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+            while ($row = $result->fetch_assoc()) {
+
+                $islemci_tipi = $row["name"];
+            }
+
+            $sql = "SELECT name FROM islemci_nesli  WHERE id=$islemci_nesli_id";
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+            while ($row = $result->fetch_assoc()) {
+
+                $islemci_nesli = $row["name"];
+            }
+
+
+            $sql = "SELECT name FROM ssd  WHERE id=$ssd_id";
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+            while ($row = $result->fetch_assoc()) {
+
+                $ssd = $row["name"];
+            }
+
+            $sql = "SELECT name FROM hdd  WHERE id=$hdd_id";
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+            while ($row = $result->fetch_assoc()) {
+
+                $hdd = $row["name"];
+            }
+
+            $sql = "SELECT name FROM ram  WHERE id=$ram_id";
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+            while ($row = $result->fetch_assoc()) {
+
+                $ram = $row["name"];
+            }
+
+            $sql = "SELECT name FROM puan  WHERE id=$puan_id";
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+            while ($row = $result->fetch_assoc()) {
+
+                $puan = $row["name"];
+            }
+
+            $sql = "SELECT name FROM ekran  WHERE id=$ekran_id";
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+            while ($row = $result->fetch_assoc()) {
+
+                $ekran = $row["name"];
+            }
+
+            $sql = "SELECT name FROM ssd  WHERE id=$ssd_id";
+            $result = $connection->query($sql);
+
+            if (!$result) {
+                die("Invalid Query : " . $connection->error);
+            }
+            while ($row = $result->fetch_assoc()) {
+
+                $ssd = $row["name"];
+            }
+
+            echo " <tr>
+<td>" . $marka . "</td>
+<td>" . $model_name . "</td>
+<td>" . $fiyat . "</td>
+<td>" . $isletim_sistemi . "</td>
+<td>" . $islemci_tipi . "</td>
+<td> " . $islemci_nesli . "</td>
+<td>" . $ssd . "</td>
+<td>" . $hdd . "</td>
+<td>" . $ram . "</td>
+<td>" . $ekran . "</td>
+<td>" . $puan . "</td>
+</tr>"
+
+            ?>
+        </tbody>
+    </table>
+</body>
+
+</html>
+
+
+
